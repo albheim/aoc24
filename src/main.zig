@@ -15,6 +15,7 @@ pub fn main() !void {
     const day = try std.fmt.parseInt(u8, args[1], 10);
     switch (day) {
         1 => try runDay("inputs/day01.txt", @import("day01.zig"), &allocator),
+        2 => try runDay("inputs/day02.txt", @import("day02.zig"), &allocator),
         else => std.log.err("Unknown day: {}\n", .{day}),
     }
 }
