@@ -1,31 +1,36 @@
 const std = @import("std");
 const common = @import("common.zig");
+const config = @import("config");
+
+const dayModule = switch (config.day) {
+    1 => @import("day01.zig"),
+    2 => @import("day02.zig"),
+    3 => @import("day03.zig"),
+    else => {
+        std.debug.print("Error: invalid day {d}", .{config.day});
+        unreachable;
+    },
+};
+
+const dayData = "inputs/day" ++ switch (config.day) {
+    1 => "01",
+    2 => "02",
+    3 => "03",
+    else => {
+        std.debug.print("Error: invalid day {d}", .{config.day});
+        unreachable;
+    },
+} ++ ".txt";
 
 pub fn main() !void {
     var allocator_type = std.heap.GeneralPurposeAllocator(.{}){};
     const allocator = allocator_type.allocator();
-    const args = try std.process.argsAlloc(allocator);
-    defer std.process.argsFree(allocator, args);
 
-    if (args.len < 2) {
-        std.log.err("Usage: zig build run [--release] -- <day>\n", .{});
-        return;
-    }
-
-    const day = try std.fmt.parseInt(u8, args[1], 10);
-    switch (day) {
-        1 => try runDay("inputs/day01.txt", @import("day01.zig"), &allocator),
-        2 => try runDay("inputs/day02.txt", @import("day02.zig"), &allocator),
-        else => std.log.err("Unknown day: {}\n", .{day}),
-    }
-}
-
-fn runDay(inputFile: []const u8, dayModule: anytype, allocator: *const std.mem.Allocator) !void {
-    const input = try common.readFile(inputFile, allocator);
+    const input = try common.readFile(dayData, &allocator);
     defer allocator.free(input);
 
-    const part1 = try dayModule.part1(input, allocator);
-    const part2 = try dayModule.part2(input, allocator);
+    const part1 = try dayModule.part1(input, &allocator);
+    const part2 = try dayModule.part2(input, &allocator);
 
     std.debug.print("Day results:\nPart 1: {d}\nPart 2: {d}\n", .{ part1, part2 });
 }
