@@ -12,7 +12,3 @@ pub fn readFile(path: []const u8, allocator: *const std.mem.Allocator) ![]u8 {
 pub fn abs(a: i64) i64 {
     return if (a < 0) -a else a;
 }
-
-pub fn lessThan(_: void, a: i64, b: i64) bool {
-    return a < b;
-}

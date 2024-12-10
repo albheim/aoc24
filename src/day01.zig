@@ -10,8 +10,8 @@ pub fn part1(input: []const u8, allocator: *const Allocator) !i64 {
 
     const as = parsed_lists[0].items;
     const bs = parsed_lists[1].items;
-    std.mem.sort(i64, as, void{}, common.lessThan);
-    std.mem.sort(i64, bs, void{}, common.lessThan);
+    std.mem.sort(i64, as, void{}, std.sort.asc(i64));
+    std.mem.sort(i64, bs, void{}, std.sort.asc(i64));
 
     var tot: i64 = 0;
 
@@ -74,7 +74,7 @@ fn parse(input: []const u8, allocator: *const Allocator) ![2]std.ArrayList(i64) 
     return .{ as, bs };
 }
 
-test "Test 1" {
+test "Testing" {
     const sample_input =
         \\3   4
         \\4   3
@@ -85,17 +85,5 @@ test "Test 1" {
     ;
     const allocator = testing.allocator;
     try testing.expect(try part1(sample_input, &allocator) == 11);
-}
-
-test "Test 2" {
-    const sample_input =
-        \\3   4
-        \\4   3
-        \\2   5
-        \\1   3
-        \\3   9
-        \\3   3
-    ;
-    const allocator = testing.allocator;
     try testing.expect(try part2(sample_input, &allocator) == 31);
 }

@@ -81,7 +81,7 @@ fn check_levels(levels: []const i64, removed: usize) bool {
     return true;
 }
 
-test "Test 1" {
+test "Testing" {
     const sample_input =
         \\7 6 4 2 1
         \\1 2 7 8 9
@@ -92,17 +92,5 @@ test "Test 1" {
     ;
     const allocator = testing.allocator;
     try testing.expect(try part1(sample_input, &allocator) == 2);
-}
-
-test "Test 2" {
-    const sample_input =
-        \\7 6 4 2 1
-        \\1 2 7 8 9
-        \\9 7 6 2 1
-        \\1 3 2 4 5
-        \\8 6 4 4 1
-        \\1 3 6 7 9
-    ;
-    const allocator = testing.allocator;
     try testing.expect(try part2(sample_input, &allocator) == 4);
 }
