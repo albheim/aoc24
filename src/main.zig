@@ -6,6 +6,7 @@ const dayModule = switch (config.day) {
     1 => @import("day01.zig"),
     2 => @import("day02.zig"),
     3 => @import("day03.zig"),
+    4 => @import("day04.zig"),
     else => {
         std.debug.print("Error: invalid day {d}", .{config.day});
         unreachable;
@@ -16,6 +17,7 @@ const dayData = "inputs/day" ++ switch (config.day) {
     1 => "01",
     2 => "02",
     3 => "03",
+    4 => "04",
     else => {
         std.debug.print("Error: invalid day {d}", .{config.day});
         unreachable;
