@@ -13,16 +13,10 @@ const dayModule = switch (config.day) {
     },
 };
 
-const dayData = "inputs/day" ++ switch (config.day) {
-    1 => "01",
-    2 => "02",
-    3 => "03",
-    4 => "04",
-    else => {
-        std.debug.print("Error: invalid day {d}", .{config.day});
-        unreachable;
-    },
-} ++ ".txt";
+const tenths = config.day / 10;
+const ones = config.day % 10;
+const dayNbr =  [2]u8{ tenths + '0', ones + '0' };
+const dayData = "inputs/day" ++ dayNbr ++ ".txt";
 
 pub fn main() !void {
     var allocator_type = std.heap.GeneralPurposeAllocator(.{}){};
@@ -34,5 +28,5 @@ pub fn main() !void {
     const part1 = try dayModule.part1(input, &allocator);
     const part2 = try dayModule.part2(input, &allocator);
 
-    std.debug.print("Day results:\nPart 1: {d}\nPart 2: {d}\n", .{ part1, part2 });
+    std.debug.print("Part 1: {d}\nPart 2: {d}\n", .{ part1, part2 });
 }
