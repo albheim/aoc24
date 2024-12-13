@@ -7,6 +7,7 @@ const dayModule = switch (config.day) {
     2 => @import("day02.zig"),
     3 => @import("day03.zig"),
     4 => @import("day04.zig"),
+    5 => @import("day05.zig"),
     else => {
         std.debug.print("Error: invalid day {d}", .{config.day});
         unreachable;
