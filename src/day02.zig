@@ -1,7 +1,7 @@
 const std = @import("std");
 const testing = std.testing;
 const Allocator = std.mem.Allocator;
-const common = @import("common.zig");
+const common = @import("common");
 const parseInt = std.fmt.parseInt;
 
 pub fn part1(input: []const u8, allocator: *const Allocator) !i64 {

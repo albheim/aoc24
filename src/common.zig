@@ -12,3 +12,19 @@ pub fn readFile(path: []const u8, allocator: *const std.mem.Allocator) ![]u8 {
 pub fn abs(a: i64) i64 {
     return if (a < 0) -a else a;
 }
+
+pub fn Vec2(T: type) type {
+    return struct {
+        const Self = @This();
+
+        x: T,
+        y: T,
+
+        pub fn add(self: Self, other: Self) Self {
+            return Self {
+                .x = self.x + other.x,
+                .y = self.y + other.y,
+            };
+        }
+    };
+}

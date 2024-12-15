@@ -1,7 +1,7 @@
 const std = @import("std");
+const common = @import("common");
 const testing = std.testing;
 const Allocator = std.mem.Allocator;
-const common = @import("common.zig");
 
 pub fn part1(input: []const u8, allocator: *const Allocator) !i64 {
     const parsed_lists = try parse(input, allocator);
