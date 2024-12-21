@@ -16,26 +16,26 @@ pub fn build(b: *std.Build) void {
         .root_source_file = b.path("src/common.zig"),
     });
 
-    // Select which day
-    const day_str = b.option([]const u8, "day", "Which day to compile for.") orelse "all";
+    // Commands to run all files
+    const test_all_step = b.step("test", "Run tests");
+    const run_all_step = b.step("run", "Run on real data");
+    const time_all_step = b.step("time", "Run timing check");
 
-    if (std.mem.eql(u8, day_str, "all")) {
-        unreachable;
-    } else {
-        const day = std.fmt.parseInt(u8, day_str, 10) catch unreachable;
-        buildDay(b, day, target, optimize, common_module, mecha_module);
+    // Build all available days
+    for (1..26) |day| {
+        buildDay(b, day, target, optimize, common_module, mecha_module, test_all_step, run_all_step, time_all_step);
     }
 }
 
 fn buildDay(b: *std.Build,
-    day: u8,
+    day: usize,
     target: std.Build.ResolvedTarget, optimize: std.builtin.OptimizeMode,
     common_module: *std.Build.Module, mecha_module: *std.Build.Module,
+    test_all_step: *std.Build.Step, run_all_step: *std.Build.Step, time_all_step: *std.Build.Step
 ) void {
-
     // Add day option to pass to the main executable
     const options = b.addOptions();
-    options.addOption(u8, "day", day);
+    options.addOption(usize, "day", day);
 
     // Setup day module module
     const day_module_file = b.fmt("src/day{d:0>2}.zig", .{ day });
@@ -65,7 +65,7 @@ fn buildDay(b: *std.Build,
         run_cmd.addArgs(args);
     }
 
-    const run_step = b.step("run", "Run the app");
+    const run_step = b.step(b.fmt("run-{d:0>2}", .{ day }), "Run on real data");
     run_step.dependOn(&run_cmd.step);
 
     // Test command
@@ -79,7 +79,7 @@ fn buildDay(b: *std.Build,
     day_tests.root_module.addImport("common", common_module);
     const run_tests = b.addRunArtifact(day_tests);
 
-    const test_step = b.step("test", "Run tests");
+    const test_step = b.step(b.fmt("test-{d:0>2}", .{ day }), "Run tests");
     test_step.dependOn(&run_tests.step);
 
     // Profile command
@@ -87,6 +87,12 @@ fn buildDay(b: *std.Build,
     time_run.addFileArg(exe.getEmittedBin());
     time_run.step.dependOn(&run_cmd.step);
 
-    const time_step = b.step("time", "Run timing check");
+    const time_step = b.step(b.fmt("time-{d:0>2}", .{day}), "Run timing check");
     time_step.dependOn(&time_run.step);
+
+    // Add dependencies to the all steps if the day module file exists
+    std.fs.cwd().access(day_module_file, .{}) catch return;
+    test_all_step.dependOn(&run_tests.step);
+    run_all_step.dependOn(&run_cmd.step);
+    time_all_step.dependOn(time_step);
 }
