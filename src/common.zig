@@ -9,10 +9,6 @@ pub fn readFile(path: []const u8, allocator: std.mem.Allocator) ![]u8 {
     return buffer;
 }
 
-pub fn abs(a: i64) i64 {
-    return if (a < 0) -a else a;
-}
-
 pub fn Vec2(T: type) type {
     return struct {
         const Self = @This();

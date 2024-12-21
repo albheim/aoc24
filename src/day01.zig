@@ -13,13 +13,13 @@ pub fn part1(input: []const u8, allocator: Allocator) !i64 {
     std.mem.sort(i64, as, void{}, std.sort.asc(i64));
     std.mem.sort(i64, bs, void{}, std.sort.asc(i64));
 
-    var tot: i64 = 0;
+    var tot: u64 = 0;
 
     for (as, bs) |a, b| {
-        tot += common.abs(a - b);
+        tot += @abs(a - b);
     }
 
-    return tot;
+    return @intCast(tot);
 }
 
 pub fn part2(input: []const u8, allocator: Allocator) !i64 {

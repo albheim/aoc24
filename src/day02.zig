@@ -64,7 +64,7 @@ fn check_levels(levels: []const i64, removed: usize) bool {
     while (idx < levels.len) {
         const num = levels[idx];
         const diff = num - last;
-        const absdiff = common.abs(diff);
+        const absdiff = @abs(diff);
         if (absdiff < 1 or absdiff > 3) {
             return false;
         }
