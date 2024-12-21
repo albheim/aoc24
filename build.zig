@@ -38,8 +38,7 @@ fn buildDay(b: *std.Build,
     options.addOption(u8, "day", day);
 
     // Setup day module module
-    var module_buffer: [20]u8 = undefined;
-    const day_module_file = std.fmt.bufPrint(module_buffer[0..], "src/day{d:0>2}.zig", .{day}) catch unreachable;
+    const day_module_file = b.fmt("src/day{d:0>2}.zig", .{ day });
     const day_module = b.createModule(.{
         .root_source_file = b.path(day_module_file),
     });
@@ -69,13 +68,6 @@ fn buildDay(b: *std.Build,
     const run_step = b.step("run", "Run the app");
     run_step.dependOn(&run_cmd.step);
 
-    // Profile command
-    const time_run = b.addSystemCommand(&.{ "hyperfine", "./zig-out/bin/aoc24" });
-    time_run.step.dependOn(&run_cmd.step);
-
-    const time_step = b.step("time", "Run timing check");
-    time_step.dependOn(&time_run.step);
-
     // Test command
     const day_tests = b.addTest(.{
         .root_source_file = b.path(day_module_file),
@@ -89,4 +81,12 @@ fn buildDay(b: *std.Build,
 
     const test_step = b.step("test", "Run tests");
     test_step.dependOn(&run_tests.step);
+
+    // Profile command
+    const time_run = b.addSystemCommand(&.{ "hyperfine" });
+    time_run.addFileArg(exe.getEmittedBin());
+    time_run.step.dependOn(&run_cmd.step);
+
+    const time_step = b.step("time", "Run timing check");
+    time_step.dependOn(&time_run.step);
 }
