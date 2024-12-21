@@ -91,6 +91,6 @@ test "Testing" {
         \\1 3 6 7 9
     ;
     const allocator = testing.allocator;
-    try testing.expect(try part1(sample_input, allocator) == 2);
-    try testing.expect(try part2(sample_input, allocator) == 4);
+    try testing.expectEqual(2, try part1(sample_input, allocator));
+    try testing.expectEqual(4, try part2(sample_input, allocator));
 }

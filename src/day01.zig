@@ -84,6 +84,6 @@ test "Testing" {
         \\3   3
     ;
     const allocator = testing.allocator;
-    try testing.expect(try part1(sample_input, allocator) == 11);
-    try testing.expect(try part2(sample_input, allocator) == 31);
+    try testing.expectEqual(11, try part1(sample_input, allocator));
+    try testing.expectEqual(31, try part2(sample_input, allocator));
 }

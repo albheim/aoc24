@@ -154,6 +154,6 @@ test "Tests" {
         \\97,13,75,29,47
     ;
     const allocator = testing.allocator;
-    try testing.expect(try part1(sample_input, allocator) == 143);
-    try testing.expect(try part2(sample_input, allocator) == 123);
+    try testing.expectEqual(143, try part1(sample_input, allocator));
+    try testing.expectEqual(123, try part2(sample_input, allocator));
 }

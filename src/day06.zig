@@ -165,6 +165,6 @@ test "Tests" {
         \\......#...
     ;
     const allocator = testing.allocator;
-    try testing.expect(try part1(sample_input, allocator) == 41);
-    try testing.expect(try part2(sample_input, allocator) == 6);
+    try testing.expectEqual(41, try part1(sample_input, allocator));
+    try testing.expectEqual(6, try part2(sample_input, allocator));
 }
