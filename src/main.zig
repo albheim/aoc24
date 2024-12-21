@@ -13,11 +13,11 @@ pub fn main() !void {
     var allocator_type = std.heap.GeneralPurposeAllocator(.{}){};
     const allocator = allocator_type.allocator();
 
-    const input = try common.readFile(day_data, &allocator);
+    const input = try common.readFile(day_data, allocator);
     defer allocator.free(input);
 
-    const part1 = try day_module.part1(input, &allocator);
-    const part2 = try day_module.part2(input, &allocator);
+    const part1 = try day_module.part1(input, allocator);
+    const part2 = try day_module.part2(input, allocator);
 
     std.debug.print("Part 1: {d}\nPart 2: {d}\n", .{ part1, part2 });
 }

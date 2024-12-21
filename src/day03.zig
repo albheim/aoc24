@@ -15,8 +15,8 @@ const exprP1 = mecha.combine(.{
     exprMul,
 }).many(.{});
 
-pub fn part1(input: []const u8, allocator: *const Allocator) !i64 {
-    const parsed = try exprP1.parse(allocator.*, input);
+pub fn part1(input: []const u8, allocator: Allocator) !i64 {
+    const parsed = try exprP1.parse(allocator, input);
     defer allocator.free(parsed.value);
 
     var sum: i64 = 0;
@@ -37,8 +37,8 @@ const exprP2 = mecha.combine(.{
     exprCombined,
 }).many(.{});
 
-pub fn part2(input: []const u8, allocator: *const Allocator) !i64 {
-    const parsed = try exprP2.parse(allocator.*, input);
+pub fn part2(input: []const u8, allocator: Allocator) !i64 {
+    const parsed = try exprP2.parse(allocator, input);
     defer allocator.free(parsed.value);
 
     var sum: i64 = 0;
@@ -60,9 +60,9 @@ test "Tests" {
     const sample_input =
         \\xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))
     ;
-    try testing.expect(try part1(sample_input, &allocator) == 161);
+    try testing.expect(try part1(sample_input, allocator) == 161);
     const sample_input2 =
         \\xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))
     ;
-    try testing.expect(try part2(sample_input2, &allocator) == 48);
+    try testing.expect(try part2(sample_input2, allocator) == 48);
 }

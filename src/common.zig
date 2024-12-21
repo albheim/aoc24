@@ -1,6 +1,6 @@
 const std = @import("std");
 
-pub fn readFile(path: []const u8, allocator: *const std.mem.Allocator) ![]u8 {
+pub fn readFile(path: []const u8, allocator: std.mem.Allocator) ![]u8 {
     const file = try std.fs.cwd().openFile(path, .{});
     defer file.close();
     const size = try file.getEndPos();

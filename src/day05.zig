@@ -5,9 +5,9 @@ const parseInt = std.fmt.parseInt;
 const splitScalar = std.mem.splitScalar;
 const print = std.debug.print;
 
-pub fn part1(input: []const u8, allocator: *const Allocator) !i64 {
+pub fn part1(input: []const u8, allocator: Allocator) !i64 {
     var lines = splitScalar(u8, input, '\n');
-    var rules = std.AutoHashMap(i64, std.ArrayList(i64)).init(allocator.*);
+    var rules = std.AutoHashMap(i64, std.ArrayList(i64)).init(allocator);
     defer {
         var iter = rules.valueIterator();
         while (iter.next()) |list| {
@@ -25,13 +25,13 @@ pub fn part1(input: []const u8, allocator: *const Allocator) !i64 {
         if (rules.getPtr(a)) |list| {
             try list.append(b);
         } else {
-            var newList = std.ArrayList(i64).init(allocator.*);
+            var newList = std.ArrayList(i64).init(allocator);
             try newList.append(b);
             try rules.put(a, newList);
         }
     }
     var sum: i64 = 0;
-    var numbersList = std.ArrayList(i64).init(allocator.*);
+    var numbersList = std.ArrayList(i64).init(allocator);
     defer numbersList.deinit();
     while (lines.next()) |line| {
         if (line.len == 0) {
@@ -61,9 +61,9 @@ pub fn part1(input: []const u8, allocator: *const Allocator) !i64 {
     return sum;
 }
 
-pub fn part2(input: []const u8, allocator: *const Allocator) !i64 {
+pub fn part2(input: []const u8, allocator: Allocator) !i64 {
     var lines = splitScalar(u8, input, '\n');
-    var rules = std.AutoHashMap(i64, std.ArrayList(i64)).init(allocator.*);
+    var rules = std.AutoHashMap(i64, std.ArrayList(i64)).init(allocator);
     defer {
         var iter = rules.valueIterator();
         while (iter.next()) |list| {
@@ -81,13 +81,13 @@ pub fn part2(input: []const u8, allocator: *const Allocator) !i64 {
         if (rules.getPtr(a)) |list| {
             try list.append(b);
         } else {
-            var newList = std.ArrayList(i64).init(allocator.*);
+            var newList = std.ArrayList(i64).init(allocator);
             try newList.append(b);
             try rules.put(a, newList);
         }
     }
     var sum: i64 = 0;
-    var numbersList = std.ArrayList(i64).init(allocator.*);
+    var numbersList = std.ArrayList(i64).init(allocator);
     defer numbersList.deinit();
     while (lines.next()) |line| {
         if (line.len == 0) {
@@ -154,6 +154,6 @@ test "Tests" {
         \\97,13,75,29,47
     ;
     const allocator = testing.allocator;
-    try testing.expect(try part1(sample_input, &allocator) == 143);
-    try testing.expect(try part2(sample_input, &allocator) == 123);
+    try testing.expect(try part1(sample_input, allocator) == 143);
+    try testing.expect(try part2(sample_input, allocator) == 123);
 }

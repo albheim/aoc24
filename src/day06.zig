@@ -25,8 +25,8 @@ const Player = struct {
     }
 };
 
-pub fn part1(input: []const u8, allocator: *const Allocator) !i64 {
-    var map = std.ArrayList([]const u8).init(allocator.*);
+pub fn part1(input: []const u8, allocator: Allocator) !i64 {
+    var map = std.ArrayList([]const u8).init(allocator);
     defer map.deinit();
 
     var lines = splitScalar(u8, input, '\n');
@@ -58,7 +58,7 @@ pub fn part1(input: []const u8, allocator: *const Allocator) !i64 {
             }
         }
     }
-    var visited = std.AutoHashMap(Vec2(i64), usize).init(allocator.*);
+    var visited = std.AutoHashMap(Vec2(i64), usize).init(allocator);
     try visited.put(player.pos, 1);
     defer visited.deinit();
     while (player.step(map.items)) {
@@ -68,8 +68,8 @@ pub fn part1(input: []const u8, allocator: *const Allocator) !i64 {
     return visited.count();
 }
 
-fn isLoop(map: [][]const u8, player_start: Player, allocator: *const Allocator) !bool {
-    var visited = std.AutoHashMap(Player, usize).init(allocator.*);
+fn isLoop(map: [][]const u8, player_start: Player, allocator: Allocator) !bool {
+    var visited = std.AutoHashMap(Player, usize).init(allocator);
     defer visited.deinit();
 
     var player = player_start;
@@ -83,8 +83,8 @@ fn isLoop(map: [][]const u8, player_start: Player, allocator: *const Allocator) 
     return false;
 }
 
-pub fn part2(input: []const u8, allocator: *const Allocator) !i64 {
-    var map_lines = std.ArrayList([]const u8).init(allocator.*);
+pub fn part2(input: []const u8, allocator: Allocator) !i64 {
+    var map_lines = std.ArrayList([]const u8).init(allocator);
     defer map_lines.deinit();
 
     var lines = splitScalar(u8, input, '\n');
@@ -120,7 +120,7 @@ pub fn part2(input: []const u8, allocator: *const Allocator) !i64 {
     var map = map_lines.items;
     var count: i64 = 0;
 
-    var visited = std.AutoHashMap(Vec2(i64), usize).init(allocator.*);
+    var visited = std.AutoHashMap(Vec2(i64), usize).init(allocator);
     defer visited.deinit();
     var player = player_start;
     while (player.step(map)) {
@@ -165,6 +165,6 @@ test "Tests" {
         \\......#...
     ;
     const allocator = testing.allocator;
-    try testing.expect(try part1(sample_input, &allocator) == 41);
-    try testing.expect(try part2(sample_input, &allocator) == 6);
+    try testing.expect(try part1(sample_input, allocator) == 41);
+    try testing.expect(try part2(sample_input, allocator) == 6);
 }

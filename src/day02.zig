@@ -4,12 +4,12 @@ const Allocator = std.mem.Allocator;
 const common = @import("common");
 const parseInt = std.fmt.parseInt;
 
-pub fn part1(input: []const u8, allocator: *const Allocator) !i64 {
+pub fn part1(input: []const u8, allocator: Allocator) !i64 {
     var reports = std.mem.split(u8, input, "\n");
     var safe_reports: i64 = 0;
     while (reports.next()) |report| {
         var levels_str = std.mem.tokenizeScalar(u8, report, ' ');
-        var levels = std.ArrayList(i64).init(allocator.*);
+        var levels = std.ArrayList(i64).init(allocator);
         defer levels.deinit();
         while (levels_str.next()) |num_str| {
             try levels.append(try parseInt(i64, num_str, 10));
@@ -22,12 +22,12 @@ pub fn part1(input: []const u8, allocator: *const Allocator) !i64 {
     return safe_reports;
 }
 
-pub fn part2(input: []const u8, allocator: *const Allocator) !i64 {
+pub fn part2(input: []const u8, allocator: Allocator) !i64 {
     var reports = std.mem.split(u8, input, "\n");
     var safe_reports: i64 = 0;
     while (reports.next()) |report| {
         var levels_str = std.mem.tokenizeScalar(u8, report, ' ');
-        var levels = std.ArrayList(i64).init(allocator.*);
+        var levels = std.ArrayList(i64).init(allocator);
         defer levels.deinit();
         while (levels_str.next()) |num_str| {
             try levels.append(try parseInt(i64, num_str, 10));
@@ -91,6 +91,6 @@ test "Testing" {
         \\1 3 6 7 9
     ;
     const allocator = testing.allocator;
-    try testing.expect(try part1(sample_input, &allocator) == 2);
-    try testing.expect(try part2(sample_input, &allocator) == 4);
+    try testing.expect(try part1(sample_input, allocator) == 2);
+    try testing.expect(try part2(sample_input, allocator) == 4);
 }

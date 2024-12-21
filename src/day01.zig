@@ -3,7 +3,7 @@ const common = @import("common");
 const testing = std.testing;
 const Allocator = std.mem.Allocator;
 
-pub fn part1(input: []const u8, allocator: *const Allocator) !i64 {
+pub fn part1(input: []const u8, allocator: Allocator) !i64 {
     const parsed_lists = try parse(input, allocator);
     defer parsed_lists[0].deinit();
     defer parsed_lists[1].deinit();
@@ -22,7 +22,7 @@ pub fn part1(input: []const u8, allocator: *const Allocator) !i64 {
     return tot;
 }
 
-pub fn part2(input: []const u8, allocator: *const Allocator) !i64 {
+pub fn part2(input: []const u8, allocator: Allocator) !i64 {
     const parsed_lists = try parse(input, allocator);
     defer parsed_lists[0].deinit();
     defer parsed_lists[1].deinit();
@@ -31,8 +31,8 @@ pub fn part2(input: []const u8, allocator: *const Allocator) !i64 {
     const bs = parsed_lists[1].items;
 
     var tot: i64 = 0;
-    var acount = std.AutoHashMap(i64, i64).init(allocator.*);
-    var bcount = std.AutoHashMap(i64, i64).init(allocator.*);
+    var acount = std.AutoHashMap(i64, i64).init(allocator);
+    var bcount = std.AutoHashMap(i64, i64).init(allocator);
     defer acount.deinit();
     defer bcount.deinit();
 
@@ -56,9 +56,9 @@ pub fn part2(input: []const u8, allocator: *const Allocator) !i64 {
     return tot;
 }
 
-fn parse(input: []const u8, allocator: *const Allocator) ![2]std.ArrayList(i64) {
-    var as = std.ArrayList(i64).init(allocator.*);
-    var bs = std.ArrayList(i64).init(allocator.*);
+fn parse(input: []const u8, allocator: Allocator) ![2]std.ArrayList(i64) {
+    var as = std.ArrayList(i64).init(allocator);
+    var bs = std.ArrayList(i64).init(allocator);
 
     var lines = std.mem.split(u8, input, "\n");
     while (lines.next()) |line| {
@@ -84,6 +84,6 @@ test "Testing" {
         \\3   3
     ;
     const allocator = testing.allocator;
-    try testing.expect(try part1(sample_input, &allocator) == 11);
-    try testing.expect(try part2(sample_input, &allocator) == 31);
+    try testing.expect(try part1(sample_input, allocator) == 11);
+    try testing.expect(try part2(sample_input, allocator) == 31);
 }

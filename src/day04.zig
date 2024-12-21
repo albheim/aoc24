@@ -22,9 +22,9 @@ fn search(data: [][]const u8, position: [2]i64, direction: [2]i64) bool {
     return idx == target.len;
 }
 
-pub fn part1(input: []const u8, allocator: *const Allocator) !i64 {
+pub fn part1(input: []const u8, allocator: Allocator) !i64 {
     var lines = std.mem.split(u8, input, "\n");
-    var rows = std.ArrayList([]const u8).init(allocator.*);
+    var rows = std.ArrayList([]const u8).init(allocator);
     defer rows.deinit();
     while (lines.next()) |line| {
         if (line.len > 0) {
@@ -54,9 +54,9 @@ fn sAndM(a: u8, b: u8) bool {
     return a == 'S' and b == 'M' or a == 'M' and b == 'S';
 }
 
-pub fn part2(input: []const u8, allocator: *const Allocator) !i64 {
+pub fn part2(input: []const u8, allocator: Allocator) !i64 {
     var lines = std.mem.split(u8, input, "\n");
-    var rows = std.ArrayList([]const u8).init(allocator.*);
+    var rows = std.ArrayList([]const u8).init(allocator);
     defer rows.deinit();
     while (lines.next()) |line| {
         if (line.len > 0) {
@@ -91,6 +91,6 @@ test "Tests" {
         \\MXMXAXMASX
     ;
     const allocator = testing.allocator;
-    try testing.expect(try part1(sample_input, &allocator) == 18);
-    try testing.expect(try part2(sample_input, &allocator) == 9);
+    try testing.expect(try part1(sample_input, allocator) == 18);
+    try testing.expect(try part2(sample_input, allocator) == 9);
 }
