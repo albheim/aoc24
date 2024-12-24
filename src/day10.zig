@@ -11,20 +11,20 @@ fn search(mat: *FlexibleMatrix(u8), i: usize, j: usize, visited: *std.AutoHashMa
         return 0;
     }
     visited.put(Vec{ .x=i, .y=j}, true) catch unreachable;
-    if (try mat.get(i, j) == '9') {
+    if (mat.get(i, j) == '9') {
         return 1;
     }
     var found: usize = 0;
-    if (i > 0 and try mat.get(i - 1, j) == try mat.get(i, j) + 1) {
+    if (i > 0 and mat.get(i - 1, j) == mat.get(i, j) + 1) {
         found += search(mat, i - 1, j, visited);
     }
-    if (j > 0 and try mat.get(i, j - 1) == try mat.get(i, j) + 1) {
+    if (j > 0 and mat.get(i, j - 1) == mat.get(i, j) + 1) {
         found += search(mat, i, j - 1, visited);
     }
-    if (i + 1 < mat.rowCount() and try mat.get(i + 1, j) == try mat.get(i, j) + 1) {
+    if (i + 1 < mat.rowCount() and mat.get(i + 1, j) == mat.get(i, j) + 1) {
         found += search(mat, i + 1, j, visited);
     }
-    if (j + 1 < mat.colCount() and try mat.get(i, j + 1) == try mat.get(i, j) + 1) {
+    if (j + 1 < mat.colCount() and mat.get(i, j + 1) == mat.get(i, j) + 1) {
         found += search(mat, i, j + 1, visited);
     }
     return found;
@@ -41,11 +41,10 @@ pub fn part1(input: []const u8, allocator: Allocator) !i64 {
         try mat.addRow(line);
     }
 
-
     var trails: usize = 0;
     for (0..mat.colCount()) |i| {
         for (0..mat.rowCount()) |j| {
-            if (try mat.get(i, j) == '0') {
+            if (mat.get(i, j) == '0') {
                 var visited = std.AutoHashMap(Vec, bool).init(allocator);
                 defer visited.deinit();
                 trails += search(&mat, i, j, &visited);
@@ -60,20 +59,20 @@ fn search2(mat: *FlexibleMatrix(u8), i: usize, j: usize, visited: *std.AutoHashM
     if (visited.get(Vec{ .x=i, .y=j })) |n| {
         return n;
     }
-    if (try mat.get(i, j) == '9') {
+    if (mat.get(i, j) == '9') {
         return 1;
     }
     var found: usize = 0;
-    if (i > 0 and try mat.get(i - 1, j) == try mat.get(i, j) + 1) {
+    if (i > 0 and mat.get(i - 1, j) == mat.get(i, j) + 1) {
         found += search2(mat, i - 1, j, visited);
     }
-    if (j > 0 and try mat.get(i, j - 1) == try mat.get(i, j) + 1) {
+    if (j > 0 and mat.get(i, j - 1) == mat.get(i, j) + 1) {
         found += search2(mat, i, j - 1, visited);
     }
-    if (i + 1 < mat.rowCount() and try mat.get(i + 1, j) == try mat.get(i, j) + 1) {
+    if (i + 1 < mat.rowCount() and mat.get(i + 1, j) == mat.get(i, j) + 1) {
         found += search2(mat, i + 1, j, visited);
     }
-    if (j + 1 < mat.colCount() and try mat.get(i, j + 1) == try mat.get(i, j) + 1) {
+    if (j + 1 < mat.colCount() and mat.get(i, j + 1) == mat.get(i, j) + 1) {
         found += search2(mat, i, j + 1, visited);
     }
     visited.put(Vec{ .x=i, .y=j}, found) catch unreachable;
@@ -95,7 +94,7 @@ pub fn part2(input: []const u8, allocator: Allocator) !i64 {
     var trails: usize = 0;
     for (0..mat.colCount()) |i| {
         for (0..mat.rowCount()) |j| {
-            if (try mat.get(i, j) == '0') {
+            if (mat.get(i, j) == '0') {
                 var visited = std.AutoHashMap(Vec, usize).init(allocator);
                 defer visited.deinit();
                 trails += search2(&mat, i, j, &visited);

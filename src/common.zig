@@ -87,10 +87,7 @@ pub fn FlexibleMatrix(comptime T: type) type {
             self.rows += 1;
         }
 
-        pub fn get(self: Self, row: usize, col: usize) !T {
-            if (col >= self.cols or row >= self.rows) {
-                return std.debug.panic("Column index out of bounds", .{});
-            }
+        pub fn get(self: Self, row: usize, col: usize) T {
             return self.data.items[row * self.cols + col];
         }
     };
