@@ -77,6 +77,32 @@ pub fn FlexibleMatrix(comptime T: type) type {
             self.cols = ncols;
         }
 
+        pub fn print(self: Self) void {
+            for (0..self.rows) |y| {
+                for (0..self.cols) |x| {
+                    if (T == u8) {
+                        std.debug.print("{c}", .{self.get(y, x)});
+                    } else {
+                        std.debug.print("{any}", .{self.get(y, x)});
+                    }
+                }
+                std.debug.print("\n", .{});
+            }
+        }
+
+        pub fn addItem(self: *Self, item: T) !void {
+            try self.data.append(item);
+        }
+
+        pub fn nextRow(self: *Self) void {
+            if (self.cols == 0) {
+                self.cols = self.data.items.len;
+            } else if (self.data.items.len % self.cols != 0) {
+                return std.debug.panic("Row length does not match matrix column count", .{});
+            }
+            self.rows += 1;
+        }
+
         pub fn addRow(self: *Self, items: []const T) !void {
             if (self.cols == 0) {
                 self.cols = items.len;
@@ -89,6 +115,10 @@ pub fn FlexibleMatrix(comptime T: type) type {
 
         pub fn get(self: Self, row: usize, col: usize) T {
             return self.data.items[row * self.cols + col];
+        }
+
+        pub fn set(self: Self, row: usize, col: usize, value: T) void {
+            self.data.items[row * self.cols + col] = value;
         }
     };
 }
