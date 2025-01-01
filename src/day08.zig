@@ -56,7 +56,7 @@ pub fn part1(input: []const u8, allocator: Allocator) !i64 {
     var data = try ParsedData.parse(input, allocator);
     defer data.deinit();
 
-    var antinodes = std.AutoHashMap(Vec, usize).init(allocator);
+    var antinodes = std.AutoHashMap(Vec, void).init(allocator);
     defer antinodes.deinit();
 
     var iter = data.stations.iterator();
@@ -67,7 +67,7 @@ pub fn part1(input: []const u8, allocator: Allocator) !i64 {
                 const diff = list[i].diff(list[j]);
                 for ([_]Vec{ list[i].add(diff), list[j].add(diff.scale(-1)) }) |a| {
                     if (a.isInside(data.width, data.height)) {
-                        try antinodes.put(a, 1);
+                        try antinodes.put(a, {});
                     }
                 }
             }

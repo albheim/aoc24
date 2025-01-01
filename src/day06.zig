@@ -58,11 +58,12 @@ pub fn part1(input: []const u8, allocator: Allocator) !i64 {
             }
         }
     }
-    var visited = std.AutoHashMap(Vec2(i64), usize).init(allocator);
-    try visited.put(player.pos, 1);
+    var visited = std.AutoHashMap(Vec2(i64), void).init(allocator);
     defer visited.deinit();
+
+    try visited.put(player.pos, {});
     while (player.step(map.items)) {
-        try visited.put(player.pos, 1);
+        try visited.put(player.pos, {});
     }
 
     return visited.count();

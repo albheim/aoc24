@@ -8,12 +8,12 @@ const FlexibleMatrix = common.FlexibleMatrix(u8);
 fn check_region(
     mat: *FlexibleMatrix,
     i: usize, j: usize,
-    visited: *std.AutoHashMap(Vec, bool)
+    visited: *std.AutoHashMap(Vec, void)
 ) struct { usize, usize } {
     if (visited.contains(.{ .x = i, .y = j })) {
         return .{ 0, 0 };
     }
-    visited.put(.{ .x = i, .y = j }, true) catch unreachable;
+    visited.put(.{ .x = i, .y = j }, {}) catch unreachable;
     var sides: usize = 4;
     var area: usize = 1;
 
@@ -52,7 +52,7 @@ pub fn part1(input: []const u8, allocator: Allocator) !i64 {
         try mat.addRow(line);
     }
 
-    var visited = std.AutoHashMap(Vec, bool).init(allocator);
+    var visited = std.AutoHashMap(Vec, void).init(allocator);
     defer visited.deinit();
     var total_price: usize = 0;
     for (0..mat.colCount()) |i| {
@@ -70,12 +70,12 @@ pub fn part1(input: []const u8, allocator: Allocator) !i64 {
 fn check_region2(
     mat: *FlexibleMatrix,
     p: Vec,
-    visited: *std.AutoHashMap(Vec, bool)
+    visited: *std.AutoHashMap(Vec, void)
 ) struct { i64, i64 } {
     if (visited.contains(p)) {
         return .{ 0, 0 };
     }
-    visited.put(p, true) catch unreachable;
+    visited.put(p, {}) catch unreachable;
     var corners: i64 = 0;
     var area: i64 = 1;
 
@@ -164,7 +164,7 @@ pub fn part2(input: []const u8, allocator: Allocator) !i64 {
         try mat.addRow(line);
     }
 
-    var visited = std.AutoHashMap(Vec, bool).init(allocator);
+    var visited = std.AutoHashMap(Vec, void).init(allocator);
     defer visited.deinit();
     var total_price: i64 = 0;
     for (0..mat.colCount()) |i| {

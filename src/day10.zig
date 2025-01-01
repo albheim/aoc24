@@ -6,11 +6,11 @@ const common = @import("common");
 const FlexibleMatrix = common.FlexibleMatrix;
 const Vec = common.Vec2(usize);
 
-fn search(mat: *FlexibleMatrix(u8), i: usize, j: usize, visited: *std.AutoHashMap(Vec, bool)) usize {
-    if (visited.get(Vec{ .x=i, .y=j })) |_| {
+fn search(mat: *FlexibleMatrix(u8), i: usize, j: usize, visited: *std.AutoHashMap(Vec, void)) usize {
+    if (visited.contains(Vec{ .x=i, .y=j })) {
         return 0;
     }
-    visited.put(Vec{ .x=i, .y=j}, true) catch unreachable;
+    visited.put(Vec{ .x=i, .y=j}, {}) catch unreachable;
     if (mat.get(i, j) == '9') {
         return 1;
     }
@@ -45,7 +45,7 @@ pub fn part1(input: []const u8, allocator: Allocator) !i64 {
     for (0..mat.colCount()) |i| {
         for (0..mat.rowCount()) |j| {
             if (mat.get(i, j) == '0') {
-                var visited = std.AutoHashMap(Vec, bool).init(allocator);
+                var visited = std.AutoHashMap(Vec, void).init(allocator);
                 defer visited.deinit();
                 trails += search(&mat, i, j, &visited);
             }

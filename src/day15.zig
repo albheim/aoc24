@@ -111,7 +111,7 @@ pub fn part1(input: []const u8, allocator: Allocator) !i64 {
 fn stepupdown(grid: FlexibleMatrix, pos: Vec, dir: Vec, allocator: Allocator) !bool {
     var boxes = std.ArrayList(Vec).init(allocator);
     defer boxes.deinit();
-    var added = std.AutoHashMap(Vec, bool).init(allocator);
+    var added = std.AutoHashMap(Vec, void).init(allocator);
     defer added.deinit();
 
     var next = pos.add(dir);
@@ -155,8 +155,8 @@ fn stepupdown(grid: FlexibleMatrix, pos: Vec, dir: Vec, allocator: Allocator) !b
 
         try boxes.append(next);
         try boxes.append(other);
-        try added.put(next, true);
-        try added.put(other, true);
+        try added.put(next, {});
+        try added.put(other, {});
     }
 
     if (possible) {
