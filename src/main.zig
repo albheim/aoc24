@@ -19,5 +19,5 @@ pub fn main() !void {
     const part1 = try day_module.part1(input, allocator);
     const part2 = try day_module.part2(input, allocator);
 
-    std.debug.print("Part 1: {d}\nPart 2: {d}\n", .{ part1, part2 });
+    std.debug.print("Day {s}\nP1: {d}\nP2: {d}\n", .{ day_nbr, part1, part2 });
 }
