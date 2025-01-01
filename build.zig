@@ -61,10 +61,6 @@ fn buildDay(b: *std.Build,
 
     run_cmd.step.dependOn(b.getInstallStep());
 
-    if (b.args) |args| {
-        run_cmd.addArgs(args);
-    }
-
     const run_step = b.step(b.fmt("run-{d:0>2}", .{ day }), "Run on real data");
     run_step.dependOn(&run_cmd.step);
 
@@ -83,9 +79,9 @@ fn buildDay(b: *std.Build,
     test_step.dependOn(&run_tests.step);
 
     // Profile command
-    const time_run = b.addSystemCommand(&.{ "hyperfine" });
+    const time_run = b.addSystemCommand(&.{ "hyperfine", "--warmup=1" });
     time_run.addFileArg(exe.getEmittedBin());
-    time_run.step.dependOn(&run_cmd.step);
+    time_run.step.dependOn(b.getInstallStep());
 
     const time_step = b.step(b.fmt("time-{d:0>2}", .{day}), "Run timing check");
     time_step.dependOn(&time_run.step);
