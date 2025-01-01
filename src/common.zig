@@ -39,6 +39,10 @@ pub fn Vec2(comptime T: type) type {
             };
         }
 
+        pub fn equal(self: Self, other: Self) bool {
+            return self.x == other.x and self.y == other.y;
+        }
+
         pub fn isInside(self: Self, width: T, height: T) bool {
             return self.x >= 0 and self.x < width and self.y >= 0 and self.y < height;
         }
