@@ -1,42 +1,43 @@
 const std = @import("std");
 const common = @import("common");
 const testing = std.testing;
+const sort = std.mem.sort;
+const parseInt = std.fmt.parseInt;
 const Allocator = std.mem.Allocator;
+const ArrayList = std.ArrayList;
 
-pub fn part1(input: []const u8, allocator: Allocator) !i64 {
-    const parsed_lists = try parse(input, allocator);
-    defer parsed_lists[0].deinit();
-    defer parsed_lists[1].deinit();
+pub fn run(input: []const u8, allocator: Allocator) ![2]i64 {
+    var as = ArrayList(i64).init(allocator);
+    defer as.deinit();
+    var bs = ArrayList(i64).init(allocator);
+    defer bs.deinit();
 
-    const as = parsed_lists[0].items;
-    const bs = parsed_lists[1].items;
-    std.mem.sort(i64, as, void{}, std.sort.asc(i64));
-    std.mem.sort(i64, bs, void{}, std.sort.asc(i64));
+    var lines = std.mem.splitScalar(u8, input, '\n');
+    while (lines.next()) |line| {
+        if (line.len == 0) break;
 
-    var tot: u64 = 0;
+        var parts = std.mem.tokenizeScalar(u8, line, ' ');
+        const a = try parseInt(i64, parts.next().?, 10);
+        const b = try parseInt(i64, parts.next().?, 10);
 
-    for (as, bs) |a, b| {
-        tot += @abs(a - b);
+        try as.append(a);
+        try bs.append(b);
     }
 
-    return @intCast(tot);
-}
+    sort(i64, as.items, void{}, std.sort.asc(i64));
+    sort(i64, bs.items, void{}, std.sort.asc(i64));
 
-pub fn part2(input: []const u8, allocator: Allocator) !i64 {
-    const parsed_lists = try parse(input, allocator);
-    defer parsed_lists[0].deinit();
-    defer parsed_lists[1].deinit();
+    var list_dist: i64 = 0;
 
-    const as = parsed_lists[0].items;
-    const bs = parsed_lists[1].items;
-
-    var tot: i64 = 0;
+    var similatiry_score: i64 = 0;
     var acount = std.AutoHashMap(i64, i64).init(allocator);
-    var bcount = std.AutoHashMap(i64, i64).init(allocator);
     defer acount.deinit();
+    var bcount = std.AutoHashMap(i64, i64).init(allocator);
     defer bcount.deinit();
 
-    for (as, bs) |a, b| {
+    for (as.items, bs.items) |a, b| {
+        list_dist += @intCast(@abs(a - b));
+
         var aval = acount.get(a) orelse 0;
         aval += 1;
         try acount.put(a, aval);
@@ -50,32 +51,15 @@ pub fn part2(input: []const u8, allocator: Allocator) !i64 {
         const key = entry.key_ptr.*;
         const value = entry.value_ptr.*;
         const b = bcount.get(key) orelse 0;
-        tot += b * value * key;
+        similatiry_score += b * value * key;
     }
 
-    return tot;
+    return .{ list_dist, similatiry_score };
 }
 
-fn parse(input: []const u8, allocator: Allocator) ![2]std.ArrayList(i64) {
-    var as = std.ArrayList(i64).init(allocator);
-    var bs = std.ArrayList(i64).init(allocator);
-
-    var lines = std.mem.split(u8, input, "\n");
-    while (lines.next()) |line| {
-        var parts = std.mem.tokenizeScalar(u8, line, ' ');
-        const aa = parts.next().?;
-        const bb = parts.next().?;
-        const a = try std.fmt.parseInt(i64, aa, 10);
-        const b = try std.fmt.parseInt(i64, bb, 10);
-
-        try as.append(a);
-        try bs.append(b);
-    }
-    return .{ as, bs };
-}
-
-test "Testing" {
-    const sample_input =
+test "Sample" {
+    const allocator = testing.allocator;
+    const input =
         \\3   4
         \\4   3
         \\2   5
@@ -83,7 +67,15 @@ test "Testing" {
         \\3   9
         \\3   3
     ;
+    try testing.expectEqual(.{ 11, 31 }, run(input, allocator));
+}
+
+test "Full" {
     const allocator = testing.allocator;
-    try testing.expectEqual(11, try part1(sample_input, allocator));
-    try testing.expectEqual(31, try part2(sample_input, allocator));
+    const buffer = try allocator.alloc(u8, 20);
+    defer allocator.free(buffer);
+    const input_path = try std.fmt.bufPrint(buffer, "inputs/{any}.txt", .{ @This() });
+    const input = try common.readFile(input_path, allocator);
+    defer allocator.free(input);
+    try testing.expectEqual(.{ 2264607, 19457120 }, run(input, allocator));
 }

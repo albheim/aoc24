@@ -4,9 +4,16 @@ const Allocator = std.mem.Allocator;
 const print = std.debug.print;
 const common = @import("common");
 const FlexibleMatrix = common.FlexibleMatrix;
-const Vec = common.Vec2(usize);
+const Vec = common.Vec2(u64);
 
-fn search(mat: *FlexibleMatrix(u8), i: usize, j: usize, visited: *std.AutoHashMap(Vec, void)) usize {
+pub fn run(input: []const u8, allocator: Allocator) ![2]u64 {
+    return .{
+        try part1(input, allocator),
+        try part2(input, allocator),
+    };
+}
+
+fn search(mat: *FlexibleMatrix(u8), i: u64, j: u64, visited: *std.AutoHashMap(Vec, void)) u64 {
     if (visited.contains(Vec{ .x=i, .y=j })) {
         return 0;
     }
@@ -14,7 +21,7 @@ fn search(mat: *FlexibleMatrix(u8), i: usize, j: usize, visited: *std.AutoHashMa
     if (mat.get(i, j) == '9') {
         return 1;
     }
-    var found: usize = 0;
+    var found: u64 = 0;
     if (i > 0 and mat.get(i - 1, j) == mat.get(i, j) + 1) {
         found += search(mat, i - 1, j, visited);
     }
@@ -30,7 +37,7 @@ fn search(mat: *FlexibleMatrix(u8), i: usize, j: usize, visited: *std.AutoHashMa
     return found;
 }
 
-pub fn part1(input: []const u8, allocator: Allocator) !i64 {
+fn part1(input: []const u8, allocator: Allocator) !u64 {
     var mat = FlexibleMatrix(u8).init(allocator);
     defer mat.deinit();
     var lines = std.mem.splitScalar(u8, input, '\n');
@@ -41,7 +48,7 @@ pub fn part1(input: []const u8, allocator: Allocator) !i64 {
         try mat.addRow(line);
     }
 
-    var trails: usize = 0;
+    var trails: u64 = 0;
     for (0..mat.colCount()) |i| {
         for (0..mat.rowCount()) |j| {
             if (mat.get(i, j) == '0') {
@@ -52,17 +59,17 @@ pub fn part1(input: []const u8, allocator: Allocator) !i64 {
         }
     }
 
-    return @intCast(trails);
+    return trails;
 }
 
-fn search2(mat: *FlexibleMatrix(u8), i: usize, j: usize, visited: *std.AutoHashMap(Vec, usize)) usize {
+fn search2(mat: *FlexibleMatrix(u8), i: u64, j: u64, visited: *std.AutoHashMap(Vec, u64)) u64 {
     if (visited.get(Vec{ .x=i, .y=j })) |n| {
         return n;
     }
     if (mat.get(i, j) == '9') {
         return 1;
     }
-    var found: usize = 0;
+    var found: u64 = 0;
     if (i > 0 and mat.get(i - 1, j) == mat.get(i, j) + 1) {
         found += search2(mat, i - 1, j, visited);
     }
@@ -79,7 +86,7 @@ fn search2(mat: *FlexibleMatrix(u8), i: usize, j: usize, visited: *std.AutoHashM
     return found;
 }
 
-pub fn part2(input: []const u8, allocator: Allocator) !i64 {
+fn part2(input: []const u8, allocator: Allocator) !u64 {
     var mat = FlexibleMatrix(u8).init(allocator);
     defer mat.deinit();
     var lines = std.mem.splitScalar(u8, input, '\n');
@@ -91,22 +98,23 @@ pub fn part2(input: []const u8, allocator: Allocator) !i64 {
     }
 
 
-    var trails: usize = 0;
+    var trails: u64 = 0;
     for (0..mat.colCount()) |i| {
         for (0..mat.rowCount()) |j| {
             if (mat.get(i, j) == '0') {
-                var visited = std.AutoHashMap(Vec, usize).init(allocator);
+                var visited = std.AutoHashMap(Vec, u64).init(allocator);
                 defer visited.deinit();
                 trails += search2(&mat, i, j, &visited);
             }
         }
     }
 
-    return @intCast(trails);
+    return trails;
 }
 
-test "Tests" {
-    const sample_input =
+test "Sample" {
+    const allocator = testing.allocator;
+    const input =
         \\89010123
         \\78121874
         \\87430965
@@ -116,7 +124,15 @@ test "Tests" {
         \\01329801
         \\10456732
     ;
+    try testing.expectEqual(.{ 36, 81 }, run(input, allocator));
+}
+
+test "Full" {
     const allocator = testing.allocator;
-    try testing.expectEqual(36, try part1(sample_input, allocator));
-    try testing.expectEqual(81, try part2(sample_input, allocator));
+    const buffer = try allocator.alloc(u8, 20);
+    defer allocator.free(buffer);
+    const input_path = try std.fmt.bufPrint(buffer, "inputs/{any}.txt", .{ @This() });
+    const input = try common.readFile(input_path, allocator);
+    defer allocator.free(input);
+    try testing.expectEqual(.{ 501, 1017 }, run(input, allocator));
 }

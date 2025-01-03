@@ -2,7 +2,7 @@ const std = @import("std");
 const testing = std.testing;
 const Allocator = std.mem.Allocator;
 const common = @import("common");
-const Vec = common.Vec2(usize);
+const Vec = common.Vec2(u64);
 const mecha = @import("mecha");
 const gcd = std.math.gcd;
 
@@ -12,29 +12,35 @@ const coordinate_parser = mecha.combine(.{
         mecha.ascii.char('+'),
         mecha.ascii.char('='),
     }).discard(),
-    mecha.int(usize, .{}),
+    mecha.int(u64, .{}),
     mecha.string(", Y").discard(),
     mecha.oneOf(.{
         mecha.ascii.char('+'),
         mecha.ascii.char('='),
     }).discard(),
-    mecha.int(usize, .{}),
+    mecha.int(u64, .{}),
 }).map(mecha.toStruct(Vec));
 
-const line_parser = mecha.combine(.{
+const machines_parser = mecha.combine(.{
     mecha.ascii.not(coordinate_parser).many(.{ .collect = false }).discard(),
     coordinate_parser,
     mecha.ascii.char('\n').opt().discard(),
-});
-
-const machines_parser = mecha.combine(.{
-    mecha.manyN(line_parser, 3, .{}),
-}).many(.{
-    .separator = mecha.string("\n").discard(),
+}).manyN(3, .{}).many(.{
+    .separator = mecha.ascii.char('\n').discard(),
     .min = 1,
 });
 
-fn checkLeastCost(a: Vec, b: Vec, c: Vec, limit: ?usize) ?usize {
+pub fn run(input: []const u8, allocator: Allocator) ![2]u64 {
+    const machines = try machines_parser.parse(allocator, input);
+    defer allocator.free(machines.value);
+
+    return .{
+        try part1(machines.value),
+        try part2(machines.value),
+    };
+}
+
+fn checkLeastCost(a: Vec, b: Vec, c: Vec, limit: ?u64) ?u64 {
     const det: i64 = @as(i64, @intCast(a.x * b.y)) - @as(i64, @intCast(a.y * b.x));
     if (det != 0) {
         const nom_a = @as(i64, @intCast(b.y*c.x)) - @as(i64, @intCast(b.x*c.y));
@@ -56,12 +62,9 @@ fn checkLeastCost(a: Vec, b: Vec, c: Vec, limit: ?usize) ?usize {
     return null;
 }
 
-pub fn part1(input: []const u8, allocator: Allocator) !i64 {
-    const machines = try machines_parser.parse(allocator, input);
-    defer allocator.free(machines.value);
-
-    var total_cost: usize = 0;
-    for (machines.value) |machine| {
+fn part1(machines: [][3]Vec) !u64 {
+    var total_cost: u64 = 0;
+    for (machines) |machine| {
         if (checkLeastCost(machine[0], machine[1], machine[2], 100)) |val| {
             total_cost += val;
         }
@@ -69,14 +72,11 @@ pub fn part1(input: []const u8, allocator: Allocator) !i64 {
     return @intCast(total_cost);
 }
 
-pub fn part2(input: []const u8, allocator: Allocator) !i64 {
-    const machines = try machines_parser.parse(allocator, input);
-    defer allocator.free(machines.value);
-
+fn part2(machines: [][3]Vec) !u64 {
     const target_offset = Vec{ .x = 10000000000000, .y = 10000000000000 };
 
-    var total_cost: usize = 0;
-    for (machines.value) |machine| {
+    var total_cost: u64 = 0;
+    for (machines) |machine| {
         if (checkLeastCost(machine[0], machine[1], machine[2].add(target_offset), null)) |val| {
             total_cost += val;
         }
@@ -84,8 +84,9 @@ pub fn part2(input: []const u8, allocator: Allocator) !i64 {
     return @intCast(total_cost);
 }
 
-test "Tests" {
-    const sample_input =
+test "Sample" {
+    const allocator = testing.allocator;
+    const input =
         \\Button A: X+94, Y+34
         \\Button B: X+22, Y+67
         \\Prize: X=8400, Y=5400
@@ -102,7 +103,15 @@ test "Tests" {
         \\Button B: X+27, Y+71
         \\Prize: X=18641, Y=10279
     ;
+    try testing.expectEqual(.{ 480, 875318608908 }, try run(input, allocator));
+}
+
+test "Full" {
     const allocator = testing.allocator;
-    try testing.expectEqual(480, try part1(sample_input, allocator));
-    try testing.expectEqual(875318608908, try part2(sample_input, allocator));
+    const buffer = try allocator.alloc(u8, 20);
+    defer allocator.free(buffer);
+    const input_path = try std.fmt.bufPrint(buffer, "inputs/{any}.txt", .{ @This() });
+    const input = try common.readFile(input_path, allocator);
+    defer allocator.free(input);
+    try testing.expectEqual(.{ 36250, 83232379451012 }, run(input, allocator));
 }

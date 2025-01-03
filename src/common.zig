@@ -11,6 +11,10 @@ pub fn readFile(path: []const u8, allocator: Allocator) ![]u8 {
     return buffer;
 }
 
+pub fn dayToStr(n: usize) [2]u8 {
+    return .{ n / 10 + '0', n % 10 + '0' };
+}
+
 pub fn Vec2(comptime T: type) type {
     return struct {
         const Self = @This();

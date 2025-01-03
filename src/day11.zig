@@ -1,9 +1,17 @@
 const std = @import("std");
+const common = @import("common");
 const testing = std.testing;
 const Allocator = std.mem.Allocator;
 const print = std.debug.print;
 
-fn addToKey(map: *std.AutoHashMap(usize, usize), key: usize, val: usize) !void {
+pub fn run(input: []const u8, allocator: Allocator) ![2]u64 {
+    return .{
+        try part1(input, allocator),
+        try part2(input, allocator),
+    };
+}
+
+fn addToKey(map: *std.AutoHashMap(u64, u64), key: u64, val: u64) !void {
     if (map.getPtr(key)) |prev_val| {
         prev_val.* += val;
     } else {
@@ -11,8 +19,8 @@ fn addToKey(map: *std.AutoHashMap(usize, usize), key: usize, val: usize) !void {
     }
 }
 
-fn blink(stones: std.AutoHashMap(usize, usize), allocator: Allocator) !std.AutoHashMap(usize, usize) {
-    var new_stones = std.AutoHashMap(usize, usize).init(allocator);
+fn blink(stones: std.AutoHashMap(u64, u64), allocator: Allocator) !std.AutoHashMap(u64, u64) {
+    var new_stones = std.AutoHashMap(u64, u64).init(allocator);
 
     var iter = stones.iterator();
     while (iter.next()) |stone| {
@@ -23,7 +31,7 @@ fn blink(stones: std.AutoHashMap(usize, usize), allocator: Allocator) !std.AutoH
 
         const n = std.math.log10(stone.key_ptr.*) + 1;
         if (n % 2 == 0) {
-            const mask = try std.math.powi(usize, 10, n / 2);
+            const mask = try std.math.powi(u64, 10, n / 2);
             try addToKey(&new_stones, stone.key_ptr.* / mask, stone.value_ptr.*);
             try addToKey(&new_stones, stone.key_ptr.* % mask, stone.value_ptr.*);
             continue;
@@ -34,12 +42,12 @@ fn blink(stones: std.AutoHashMap(usize, usize), allocator: Allocator) !std.AutoH
     return new_stones;
 }
 
-fn blink_n(input: []const u8, allocator: Allocator, n: usize) !i64 {
-    var stones = std.AutoHashMap(usize, usize).init(allocator);
+fn blink_n(input: []const u8, allocator: Allocator, n: u64) !u64 {
+    var stones = std.AutoHashMap(u64, u64).init(allocator);
 
     var items = std.mem.splitScalar(u8, std.mem.trim(u8, input, "\n\r\t "), ' ');
     while (items.next()) |item| {
-        const id = try std.fmt.parseInt(usize, item, 10);
+        const id = try std.fmt.parseInt(u64, item, 10);
         if (stones.getPtr(id)) |val| {
             val.* += 1;
         } else {
@@ -53,28 +61,38 @@ fn blink_n(input: []const u8, allocator: Allocator, n: usize) !i64 {
         stones = tmp;
     }
 
-    var tot: usize = 0;
+    var tot: u64 = 0;
     var iter = stones.valueIterator();
     while (iter.next()) |val| {
         tot += val.*;
     }
 
     stones.deinit();
-    return @intCast(tot);
+    return tot;
 }
 
-pub fn part1(input: []const u8, allocator: Allocator) !i64 {
+fn part1(input: []const u8, allocator: Allocator) !u64 {
     return blink_n(input, allocator, 25);
 }
 
-pub fn part2(input: []const u8, allocator: Allocator) !i64 {
+fn part2(input: []const u8, allocator: Allocator) !u64 {
     return blink_n(input, allocator, 75);
 }
 
-test "Tests" {
-    const sample_input =
+test "Sample" {
+    const allocator = testing.allocator;
+    const input =
         \\125 17
     ;
+    try testing.expectEqual(55312, try part1(input, allocator));
+}
+
+test "Full" {
     const allocator = testing.allocator;
-    try testing.expectEqual(55312, try part1(sample_input, allocator));
+    const buffer = try allocator.alloc(u8, 20);
+    defer allocator.free(buffer);
+    const input_path = try std.fmt.bufPrint(buffer, "inputs/{any}.txt", .{ @This() });
+    const input = try common.readFile(input_path, allocator);
+    defer allocator.free(input);
+    try testing.expectEqual(.{ 217812, 259112729857522 }, run(input, allocator));
 }

@@ -2,20 +2,27 @@ const std = @import("std");
 const testing = std.testing;
 const Allocator = std.mem.Allocator;
 const common = @import("common");
-const Vec = common.Vec2(usize);
+const Vec = common.Vec2(u64);
 const FlexibleMatrix = common.FlexibleMatrix(u8);
+
+pub fn run(input: []const u8, allocator: Allocator) ![2]u64 {
+    return .{
+        try part1(input, allocator),
+        try part2(input, allocator),
+    };
+}
 
 fn check_region(
     mat: *FlexibleMatrix,
-    i: usize, j: usize,
+    i: u64, j: u64,
     visited: *std.AutoHashMap(Vec, void)
-) struct { usize, usize } {
+) struct { u64, u64 } {
     if (visited.contains(.{ .x = i, .y = j })) {
         return .{ 0, 0 };
     }
     visited.put(.{ .x = i, .y = j }, {}) catch unreachable;
-    var sides: usize = 4;
-    var area: usize = 1;
+    var sides: u64 = 4;
+    var area: u64 = 1;
 
     if (i > 0 and mat.get(i - 1, j) == mat.get(i, j)) {
         const res = check_region(mat, i - 1, j, visited);
@@ -41,7 +48,7 @@ fn check_region(
     return .{ area, sides };
 }
 
-pub fn part1(input: []const u8, allocator: Allocator) !i64 {
+fn part1(input: []const u8, allocator: Allocator) !u64 {
     var mat = FlexibleMatrix.init(allocator);
     defer mat.deinit();
     var lines = std.mem.splitScalar(u8, input, '\n');
@@ -54,7 +61,7 @@ pub fn part1(input: []const u8, allocator: Allocator) !i64 {
 
     var visited = std.AutoHashMap(Vec, void).init(allocator);
     defer visited.deinit();
-    var total_price: usize = 0;
+    var total_price: u64 = 0;
     for (0..mat.colCount()) |i| {
         for (0..mat.rowCount()) |j| {
             if (!visited.contains(.{ .x = i, .y = j })) {
@@ -64,20 +71,16 @@ pub fn part1(input: []const u8, allocator: Allocator) !i64 {
         }
     }
 
-    return @intCast(total_price);
+    return total_price;
 }
 
-fn check_region2(
-    mat: *FlexibleMatrix,
-    p: Vec,
-    visited: *std.AutoHashMap(Vec, void)
-) struct { i64, i64 } {
+fn check_region2(mat: *FlexibleMatrix, p: Vec, visited: *std.AutoHashMap(Vec, void)) [2]u64 {
     if (visited.contains(p)) {
         return .{ 0, 0 };
     }
     visited.put(p, {}) catch unreachable;
-    var corners: i64 = 0;
-    var area: i64 = 1;
+    var corners: u64 = 0;
+    var area: u64 = 1;
 
     const curr = mat.get(p.y, p.x);
 
@@ -153,7 +156,7 @@ fn check_region2(
     return .{ area, corners };
 }
 
-pub fn part2(input: []const u8, allocator: Allocator) !i64 {
+fn part2(input: []const u8, allocator: Allocator) !u64 {
     var mat = FlexibleMatrix.init(allocator);
     defer mat.deinit();
     var lines = std.mem.splitScalar(u8, input, '\n');
@@ -166,7 +169,7 @@ pub fn part2(input: []const u8, allocator: Allocator) !i64 {
 
     var visited = std.AutoHashMap(Vec, void).init(allocator);
     defer visited.deinit();
-    var total_price: i64 = 0;
+    var total_price: u64 = 0;
     for (0..mat.colCount()) |i| {
         for (0..mat.rowCount()) |j| {
             const p = Vec{ .x = j, .y = i };
@@ -180,8 +183,9 @@ pub fn part2(input: []const u8, allocator: Allocator) !i64 {
     return total_price;
 }
 
-test "Tests" {
-    const sample_input =
+test "Sample" {
+    const allocator = testing.allocator;
+    const input =
         \\RRRRIICCFF
         \\RRRRIICCCF
         \\VVRRRCCFFF
@@ -193,7 +197,15 @@ test "Tests" {
         \\MIIISIJEEE
         \\MMMISSJEEE
     ;
+    try testing.expectEqual(.{ 1930, 1206 }, try run(input, allocator));
+}
+
+test "Full" {
     const allocator = testing.allocator;
-    try testing.expectEqual(1930, try part1(sample_input, allocator));
-    try testing.expectEqual(1206, try part2(sample_input, allocator));
+    const buffer = try allocator.alloc(u8, 20);
+    defer allocator.free(buffer);
+    const input_path = try std.fmt.bufPrint(buffer, "inputs/{any}.txt", .{ @This() });
+    const input = try common.readFile(input_path, allocator);
+    defer allocator.free(input);
+    try testing.expectEqual(.{ 1518548, 909564 }, run(input, allocator));
 }

@@ -46,7 +46,7 @@ const Room = struct {
 
     fn toStr(self: Self, allocator: Allocator) ![]const u8 {
         var str: []u8 = try allocator.alloc(u8, @intCast(self.height * (self.width + 1)));
-        var idx: usize = 0;
+        var idx: u64 = 0;
         for (0..@intCast(self.height)) |_| {
             for (0..@intCast(self.width)) |_| {
                 str[idx] = ' ';
@@ -93,9 +93,9 @@ const Room = struct {
             rows.items[@intCast(robot.pos.y)].items[@intCast(robot.pos.x)] = true;
         }
 
-        var row_len: usize = 0;
+        var row_len: u64 = 0;
         for (rows.items) |row| {
-            var curr: usize = 0;
+            var curr: u64 = 0;
             for (row.items) |item| {
                 if (item) {
                     curr += 1;
@@ -105,9 +105,9 @@ const Room = struct {
                 }
             }
         }
-        var col_len: usize = 0;
+        var col_len: u64 = 0;
         for (0..@intCast(self.width)) |i| {
-            var curr: usize = 0;
+            var curr: u64 = 0;
             for (0..@intCast(self.height)) |j| {
                 if (rows.items[j].items[i]) {
                     curr += 1;
@@ -121,11 +121,11 @@ const Room = struct {
         return .{ .x = @intCast(row_len), .y = @intCast(col_len)};
     }
 
-    fn calculateSafetyFactor(self: Self) i64 {
-        var nw: i64 = 0;
-        var sw: i64 = 0;
-        var ne: i64 = 0;
-        var se: i64 = 0;
+    fn calculateSafetyFactor(self: Self) u64 {
+        var nw: u64 = 0;
+        var sw: u64 = 0;
+        var ne: u64 = 0;
+        var se: u64 = 0;
         const halfwidth = @divExact(self.width - 1, 2);
         const halfheight = @divExact(self.height - 1, 2);
         for (self.robots) |robot| {
@@ -147,15 +147,18 @@ const Room = struct {
     }
 };
 
-pub fn part1(input: []const u8, allocator: Allocator) !i64 {
+pub fn run(input: []const u8, allocator: Allocator) ![2]u64 {
+    const width = 101;
+    const height = 103;
+    return .{
+        try part1(input, width, height, allocator),
+        try part2(input, width, height, allocator),
+    };
+}
+
+fn part1(input: []const u8, width: i64, height: i64, allocator: Allocator) !u64 {
     const result = try robots_parser.parse(allocator, input);
     defer allocator.free(result.value);
-    var width: i64 = 101;
-    var height: i64 = 103;
-    if (builtin.is_test) { // Test had smaller room
-        width = 11;
-        height = 7;
-    }
     var room = Room{
         .robots = result.value,
         .width = width,
@@ -165,13 +168,13 @@ pub fn part1(input: []const u8, allocator: Allocator) !i64 {
     return room.calculateSafetyFactor();
 }
 
-pub fn part2(input: []const u8, allocator: Allocator) !i64 {
+fn part2(input: []const u8, width: i64, height: i64, allocator: Allocator) !u64 {
     const result = try robots_parser.parse(allocator, input);
     defer allocator.free(result.value);
     var room = Room{
         .robots = result.value,
-        .width = 101,
-        .height = 103,
+        .width = width,
+        .height = height,
     };
     const min_height = 20;
     const min_width = 20;
@@ -223,11 +226,12 @@ pub fn part2(input: []const u8, allocator: Allocator) !i64 {
             break;
         }
     }
-    return curr;
+    return @intCast(curr);
 }
 
-test "Tests" {
-    const sample_input =
+test "Sample" {
+    const allocator = testing.allocator;
+    const input =
         \\p=0,4 v=3,-3
         \\p=6,3 v=-1,-3
         \\p=10,3 v=-1,2
@@ -241,6 +245,15 @@ test "Tests" {
         \\p=2,4 v=2,-3
         \\p=9,5 v=-3,-3
     ;
+    try testing.expectEqual(12, try part1(input, 11, 7, allocator));
+}
+
+test "Full" {
     const allocator = testing.allocator;
-    try testing.expectEqual(12, try part1(sample_input, allocator));
+    const buffer = try allocator.alloc(u8, 20);
+    defer allocator.free(buffer);
+    const input_path = try std.fmt.bufPrint(buffer, "inputs/{any}.txt", .{ @This() });
+    const input = try common.readFile(input_path, allocator);
+    defer allocator.free(input);
+    try testing.expectEqual(.{ 222208000, 7623 }, run(input, allocator));
 }

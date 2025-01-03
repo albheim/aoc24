@@ -1,16 +1,24 @@
 const std = @import("std");
+const common = @import("common");
 const testing = std.testing;
 const Allocator = std.mem.Allocator;
 const print = std.debug.print;
 const parseInt = std.fmt.parseInt;
 
-pub fn part1(input: []const u8, allocator: Allocator) !i64 {
+pub fn run(input: []const u8, allocator: Allocator) ![2]u64 {
+    return .{
+        try part1(input, allocator),
+        try part2(input, allocator),
+    };
+}
+
+fn part1(input: []const u8, allocator: Allocator) !u64 {
     _ = allocator;
-    var checksum: usize = 0;
-    var idx: usize = 0;
-    var id_start: usize = 0;
-    var id_end: usize = (input.len - 1) / 2;
-    var avail_end: usize = input[id_end * 2] - '0';
+    var checksum: u64 = 0;
+    var idx: u64 = 0;
+    var id_start: u64 = 0;
+    var id_end: u64 = (input.len - 1) / 2;
+    var avail_end: u64 = input[id_end * 2] - '0';
 
     while (id_start < id_end) {
         var n = input[id_start * 2] - '0';
@@ -35,7 +43,7 @@ pub fn part1(input: []const u8, allocator: Allocator) !i64 {
         idx += 1;
     }
 
-    return @intCast(checksum);
+    return checksum;
 }
 
 const BlockTypeTag = enum {
@@ -45,15 +53,15 @@ const BlockTypeTag = enum {
 
 const BlockType = union(BlockTypeTag) {
     empty: void,
-    full: usize,
+    full: u64,
 };
 
 const Block = struct {
     block_type: BlockType,
-    count: usize,
+    count: u64,
 };
 
-pub fn part2(input: []const u8, allocator: Allocator) !i64 {
+fn part2(input: []const u8, allocator: Allocator) !u64 {
     var list = std.ArrayList(Block).init(allocator);
     defer list.deinit();
 
@@ -62,16 +70,16 @@ pub fn part2(input: []const u8, allocator: Allocator) !i64 {
         if (c == '\n') {
             break;
         }
-        if (try std.math.mod(usize, i, 2) == 0) {
+        if (try std.math.mod(u64, i, 2) == 0) {
             try list.append(Block{ .block_type = BlockType{ .full = i / 2 }, .count = c - '0' });
         } else {
             try list.append(Block{ .block_type = BlockTypeTag.empty, .count = c - '0' });
         }
     }
 
-    var checksum: usize = 0;
-    var idx: usize = 0;
-    var i: usize = 0;
+    var checksum: u64 = 0;
+    var idx: u64 = 0;
+    var i: u64 = 0;
     while (i < list.items.len) : (i += 1) {
         switch (list.items[i].block_type) {
             .full => |id| {
@@ -107,11 +115,20 @@ pub fn part2(input: []const u8, allocator: Allocator) !i64 {
     return @intCast(checksum);
 }
 
-test "Tests" {
-    const sample_input =
+test "Sample" {
+    const allocator = testing.allocator;
+    const input =
         \\2333133121414131402
     ;
+    try testing.expectEqual(.{ 1928, 2858 }, run(input, allocator));
+}
+
+test "Full" {
     const allocator = testing.allocator;
-    try testing.expectEqual(1928, try part1(sample_input, allocator));
-    try testing.expectEqual(2858, try part2(sample_input, allocator));
+    const buffer = try allocator.alloc(u8, 20);
+    defer allocator.free(buffer);
+    const input_path = try std.fmt.bufPrint(buffer, "inputs/{any}.txt", .{ @This() });
+    const input = try common.readFile(input_path, allocator);
+    defer allocator.free(input);
+    try testing.expectEqual(.{ 6398252054886, 6415666220005 }, run(input, allocator));
 }

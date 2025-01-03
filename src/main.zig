@@ -1,12 +1,11 @@
 const std = @import("std");
 const config = @import("config");
-
-const day_module = @import("day_module");
 const common = @import("common");
+const day_module = @import("day_module");
 
-const tenths = config.day / 10;
-const ones = config.day % 10;
-const day_nbr =  [2]u8{ tenths + '0', ones + '0' };
+const stdout = std.io.getStdOut().writer();
+
+const day_nbr =  common.dayToStr(config.day);
 const day_data = "inputs/day" ++ day_nbr ++ ".txt";
 
 pub fn main() !void {
@@ -16,8 +15,16 @@ pub fn main() !void {
     const input = try common.readFile(day_data, allocator);
     defer allocator.free(input);
 
-    const part1 = try day_module.part1(input, allocator);
-    const part2 = try day_module.part2(input, allocator);
+    const res = try day_module.run(input, allocator);
+    try stdout.print("== Day {s} ==\n", .{ day_nbr });
+    try printRes("P1", res[0]);
+    try printRes("P2", res[1]);
+}
 
-    std.debug.print("Day {s}\nP1: {d}\nP2: {d}\n", .{ day_nbr, part1, part2 });
+fn printRes(step: []const u8, data: anytype) !void {
+    if (@TypeOf(data) == []const u8) {
+        try stdout.print("{s}: {s}\n", .{ step, data });
+    } else {
+        try stdout.print("{s}: {d}\n", .{ step, data });
+    }
 }

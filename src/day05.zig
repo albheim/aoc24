@@ -1,13 +1,19 @@
 const std = @import("std");
+const common = @import("common");
 const testing = std.testing;
 const Allocator = std.mem.Allocator;
 const parseInt = std.fmt.parseInt;
-const splitScalar = std.mem.splitScalar;
-const print = std.debug.print;
 
-pub fn part1(input: []const u8, allocator: Allocator) !i64 {
-    var lines = splitScalar(u8, input, '\n');
-    var rules = std.AutoHashMap(i64, std.ArrayList(i64)).init(allocator);
+pub fn run(input: []const u8, allocator: Allocator) ![2]u64 {
+    return .{
+        try part1(input, allocator),
+        try part2(input, allocator),
+    };
+}
+
+fn part1(input: []const u8, allocator: Allocator) !u64 {
+    var lines = std.mem.splitScalar(u8, input, '\n');
+    var rules = std.AutoHashMap(u64, std.ArrayList(u64)).init(allocator);
     defer {
         var iter = rules.valueIterator();
         while (iter.next()) |list| {
@@ -19,29 +25,29 @@ pub fn part1(input: []const u8, allocator: Allocator) !i64 {
         if (line.len == 0) {
             break;
         }
-        var numbers = splitScalar(u8, line, '|');
-        const a = try parseInt(i64, numbers.next().?, 10);
-        const b = try parseInt(i64, numbers.next().?, 10);
+        var numbers = std.mem.splitScalar(u8, line, '|');
+        const a = try parseInt(u64, numbers.next().?, 10);
+        const b = try parseInt(u64, numbers.next().?, 10);
         if (rules.getPtr(a)) |list| {
             try list.append(b);
         } else {
-            var newList = std.ArrayList(i64).init(allocator);
+            var newList = std.ArrayList(u64).init(allocator);
             try newList.append(b);
             try rules.put(a, newList);
         }
     }
-    var sum: i64 = 0;
-    var numbersList = std.ArrayList(i64).init(allocator);
+    var sum: u64 = 0;
+    var numbersList = std.ArrayList(u64).init(allocator);
     defer numbersList.deinit();
     while (lines.next()) |line| {
         if (line.len == 0) {
             break;
         }
-        var numbers = splitScalar(u8, line, ',');
+        var numbers = std.mem.splitScalar(u8, line, ',');
         var failed = false;
         numbersList.clearAndFree();
         skipLine: while (numbers.next()) |number| {
-            const n = try parseInt(i64, number, 10);
+            const n = try parseInt(u64, number, 10);
             if (rules.get(n)) |list| {
                 for (list.items) |rule| {
                     for (numbersList.items) |prev| {
@@ -61,9 +67,9 @@ pub fn part1(input: []const u8, allocator: Allocator) !i64 {
     return sum;
 }
 
-pub fn part2(input: []const u8, allocator: Allocator) !i64 {
-    var lines = splitScalar(u8, input, '\n');
-    var rules = std.AutoHashMap(i64, std.ArrayList(i64)).init(allocator);
+fn part2(input: []const u8, allocator: Allocator) !u64 {
+    var lines = std.mem.splitScalar(u8, input, '\n');
+    var rules = std.AutoHashMap(u64, std.ArrayList(u64)).init(allocator);
     defer {
         var iter = rules.valueIterator();
         while (iter.next()) |list| {
@@ -75,29 +81,29 @@ pub fn part2(input: []const u8, allocator: Allocator) !i64 {
         if (line.len == 0) {
             break;
         }
-        var numbers = splitScalar(u8, line, '|');
-        const a = try parseInt(i64, numbers.next().?, 10);
-        const b = try parseInt(i64, numbers.next().?, 10);
+        var numbers = std.mem.splitScalar(u8, line, '|');
+        const a = try parseInt(u64, numbers.next().?, 10);
+        const b = try parseInt(u64, numbers.next().?, 10);
         if (rules.getPtr(a)) |list| {
             try list.append(b);
         } else {
-            var newList = std.ArrayList(i64).init(allocator);
+            var newList = std.ArrayList(u64).init(allocator);
             try newList.append(b);
             try rules.put(a, newList);
         }
     }
-    var sum: i64 = 0;
-    var numbersList = std.ArrayList(i64).init(allocator);
+    var sum: u64 = 0;
+    var numbersList = std.ArrayList(u64).init(allocator);
     defer numbersList.deinit();
     while (lines.next()) |line| {
         if (line.len == 0) {
             break;
         }
-        var numbers = splitScalar(u8, line, ',');
+        var numbers = std.mem.splitScalar(u8, line, ',');
         var failed = false;
         numbersList.clearAndFree();
         while (numbers.next()) |number| {
-            const n = try parseInt(i64, number, 10);
+            const n = try parseInt(u64, number, 10);
             var switched = false;
             if (rules.get(n)) |list| {
                 done: for (numbersList.items, 0..) |prev, idx| {
@@ -122,8 +128,9 @@ pub fn part2(input: []const u8, allocator: Allocator) !i64 {
     return sum;
 }
 
-test "Tests" {
-    const sample_input =
+test "Sample" {
+    const allocator = testing.allocator;
+    const input =
         \\47|53
         \\97|13
         \\97|61
@@ -153,7 +160,15 @@ test "Tests" {
         \\61,13,29
         \\97,13,75,29,47
     ;
+    try testing.expectEqual(.{ 143, 123 }, run(input, allocator));
+}
+
+test "Full" {
     const allocator = testing.allocator;
-    try testing.expectEqual(143, try part1(sample_input, allocator));
-    try testing.expectEqual(123, try part2(sample_input, allocator));
+    const buffer = try allocator.alloc(u8, 20);
+    defer allocator.free(buffer);
+    const input_path = try std.fmt.bufPrint(buffer, "inputs/{any}.txt", .{ @This() });
+    const input = try common.readFile(input_path, allocator);
+    defer allocator.free(input);
+    try testing.expectEqual(.{ 5955, 4030 }, run(input, allocator));
 }

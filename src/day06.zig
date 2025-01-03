@@ -2,8 +2,6 @@ const std = @import("std");
 const common = @import("common");
 const testing = std.testing;
 const Allocator = std.mem.Allocator;
-const splitScalar = std.mem.splitScalar;
-const print = std.debug.print;
 const Vec2 = common.Vec2;
 
 const Player = struct {
@@ -25,16 +23,23 @@ const Player = struct {
     }
 };
 
-pub fn part1(input: []const u8, allocator: Allocator) !i64 {
+pub fn run(input: []const u8, allocator: Allocator) ![2]u64 {
+    return .{
+        try part1(input, allocator),
+        try part2(input, allocator),
+    };
+}
+
+fn part1(input: []const u8, allocator: Allocator) !u64 {
     var map = std.ArrayList([]const u8).init(allocator);
     defer map.deinit();
 
-    var lines = splitScalar(u8, input, '\n');
+    var lines = std.mem.splitScalar(u8, input, '\n');
     var player = Player{
         .pos = .{ .x = 0, .y = 0 },
         .dir = .{ .x = 0, .y = 0 }
     };
-    var lineCount: usize = 0;
+    var lineCount: u64 = 0;
     while (lines.next()) |line| : (lineCount += 1) {
         if (line.len == 0) {
             break;
@@ -69,31 +74,16 @@ pub fn part1(input: []const u8, allocator: Allocator) !i64 {
     return visited.count();
 }
 
-fn isLoop(map: [][]const u8, player_start: Player, allocator: Allocator) !bool {
-    var visited = std.AutoHashMap(Player, usize).init(allocator);
-    defer visited.deinit();
-
-    var player = player_start;
-    try visited.put(player, 1);
-    while (player.step(map)) {
-        if (visited.get(player)) |_| {
-            return true;
-        }
-        try visited.put(player, 1);
-    }
-    return false;
-}
-
-pub fn part2(input: []const u8, allocator: Allocator) !i64 {
+fn part2(input: []const u8, allocator: Allocator) !u64 {
     var map_lines = std.ArrayList([]const u8).init(allocator);
     defer map_lines.deinit();
 
-    var lines = splitScalar(u8, input, '\n');
+    var lines = std.mem.splitScalar(u8, input, '\n');
     var player_start = Player{
         .pos = .{ .x = 0, .y = 0 },
         .dir = .{ .x = 0, .y = 0 }
     };
-    var lineCount: usize = 0;
+    var lineCount: u64 = 0;
     while (lines.next()) |line| : (lineCount += 1) {
         if (line.len == 0) {
             break;
@@ -119,9 +109,9 @@ pub fn part2(input: []const u8, allocator: Allocator) !i64 {
     }
 
     var map = map_lines.items;
-    var count: i64 = 0;
+    var count: u64 = 0;
 
-    var visited = std.AutoHashMap(Vec2(i64), usize).init(allocator);
+    var visited = std.AutoHashMap(Vec2(i64), u64).init(allocator);
     defer visited.deinit();
     var player = player_start;
     while (player.step(map)) {
@@ -129,8 +119,8 @@ pub fn part2(input: []const u8, allocator: Allocator) !i64 {
             continue;
         }
         try visited.put(player.pos, 1);
-        const i: usize = @intCast(player.pos.y);
-        const j: usize = @intCast(player.pos.x);
+        const i: u64 = @intCast(player.pos.y);
+        const j: u64 = @intCast(player.pos.x);
         if (map[i][j] == '.') {
             var tmp = try allocator.alloc(u8, map[0].len);
             defer allocator.free(tmp);
@@ -152,8 +142,24 @@ pub fn part2(input: []const u8, allocator: Allocator) !i64 {
     return count;
 }
 
-test "Tests" {
-    const sample_input =
+fn isLoop(map: [][]const u8, player_start: Player, allocator: Allocator) !bool {
+    var visited = std.AutoHashMap(Player, u64).init(allocator);
+    defer visited.deinit();
+
+    var player = player_start;
+    try visited.put(player, 1);
+    while (player.step(map)) {
+        if (visited.get(player)) |_| {
+            return true;
+        }
+        try visited.put(player, 1);
+    }
+    return false;
+}
+
+test "Sample" {
+    const allocator = testing.allocator;
+    const input =
         \\....#.....
         \\.........#
         \\..........
@@ -165,7 +171,15 @@ test "Tests" {
         \\#.........
         \\......#...
     ;
+    try testing.expectEqual(.{ 41, 6 }, run(input, allocator));
+}
+
+test "Full" {
     const allocator = testing.allocator;
-    try testing.expectEqual(41, try part1(sample_input, allocator));
-    try testing.expectEqual(6, try part2(sample_input, allocator));
+    const buffer = try allocator.alloc(u8, 20);
+    defer allocator.free(buffer);
+    const input_path = try std.fmt.bufPrint(buffer, "inputs/{any}.txt", .{ @This() });
+    const input = try common.readFile(input_path, allocator);
+    defer allocator.free(input);
+    try testing.expectEqual(.{ 5461, 1836 }, run(input, allocator));
 }

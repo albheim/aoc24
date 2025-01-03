@@ -15,6 +15,13 @@ const down = Vec{ .x = 0, .y = 1 };
 const left = Vec{ .x = -1, .y = 0 };
 const right = Vec{ .x = 1, .y = 0 };
 
+pub fn run(input: []const u8, allocator: Allocator) ![2]u64 {
+    return .{
+        try part1(input, allocator),
+        try part2(input, allocator),
+    };
+}
+
 fn step(grid: FlexibleMatrix, pos: Vec, dir: Vec) !bool {
     const new_pos = pos.add(dir);
     switch (grid.get(@intCast(new_pos.y), @intCast(new_pos.x))) {
@@ -34,7 +41,7 @@ fn step(grid: FlexibleMatrix, pos: Vec, dir: Vec) !bool {
     }
 }
 
-fn run(grid: FlexibleMatrix, moves: std.ArrayList(u8)) !void {
+fn simulate(grid: FlexibleMatrix, moves: std.ArrayList(u8)) !void {
     var pos: Vec = undefined;
     for (0..grid.rowCount()) |y| {
         for (0..grid.colCount()) |x| {
@@ -73,8 +80,8 @@ fn run(grid: FlexibleMatrix, moves: std.ArrayList(u8)) !void {
     }
 }
 
-fn scoreGrid(grid: FlexibleMatrix, box_token: u8) i64 {
-    var score: usize = 0;
+fn scoreGrid(grid: FlexibleMatrix, box_token: u8) u64 {
+    var score: u64 = 0;
     for (0..grid.rowCount()) |y| {
         for (0..grid.colCount()) |x| {
             if (grid.get(y, x) == box_token) {
@@ -82,11 +89,11 @@ fn scoreGrid(grid: FlexibleMatrix, box_token: u8) i64 {
             }
         }
     }
-    return @intCast(score);
+    return score;
 }
 
 
-pub fn part1(input: []const u8, allocator: Allocator) !i64 {
+fn part1(input: []const u8, allocator: Allocator) !u64 {
     var grid = FlexibleMatrix.init(allocator);
     defer grid.deinit();
 
@@ -103,7 +110,7 @@ pub fn part1(input: []const u8, allocator: Allocator) !i64 {
         try moves.appendSlice(line);
     }
 
-    try run(grid, moves);
+    try simulate(grid, moves);
 
     return scoreGrid(grid, 'O');
 }
@@ -129,7 +136,7 @@ fn stepupdown(grid: FlexibleMatrix, pos: Vec, dir: Vec, allocator: Allocator) !b
         else => return Day15Errors.InvalidTile,
     }
 
-    var idx: usize = 0;
+    var idx: u64 = 0;
     var possible = true;
     var other: Vec = undefined;
     while (idx < boxes.items.len) : (idx += 1) {
@@ -264,7 +271,7 @@ fn run2(grid: FlexibleMatrix, moves: std.ArrayList(u8), allocator: Allocator) !v
     }
 }
 
-pub fn part2(input: []const u8, allocator: Allocator) !i64 {
+fn part2(input: []const u8, allocator: Allocator) !u64 {
     var grid = FlexibleMatrix.init(allocator);
     defer grid.deinit();
 
@@ -304,8 +311,9 @@ pub fn part2(input: []const u8, allocator: Allocator) !i64 {
     return scoreGrid(grid, '[');
 }
 
-test "Tests" {
-    const sample_input_small =
+test "Sample 1" {
+    const allocator = testing.allocator;
+    const input =
         \\########
         \\#..O.O.#
         \\##@.O..#
@@ -317,7 +325,12 @@ test "Tests" {
         \\
         \\<^^>>>vv<v>>v<<
     ;
-    const sample_input_large =
+    try testing.expectEqual(2028, try part1(input, allocator));
+}
+
+test "Sample 2" {
+    const allocator = testing.allocator;
+    const input =
         \\##########
         \\#..O..O.O#
         \\#......O.#
@@ -340,8 +353,15 @@ test "Tests" {
         \\^^>vv<^v^v<vv>^<><v<^v>^^^>>>^^vvv^>vvv<>>>^<^>>>>>^<<^v>^vvv<>^<><<v>
         \\v^^>>><<^^<>>^v^<v^vv<>v^<<>^<^v^v><^<<<><<^<v><v<>vv>>v><v^<vv<>v^<<^
     ;
+    try testing.expectEqual(.{ 10092, 9021 }, try run(input, allocator));
+}
+
+test "Full" {
     const allocator = testing.allocator;
-    try testing.expectEqual(2028, try part1(sample_input_small, allocator));
-    try testing.expectEqual(10092, try part1(sample_input_large, allocator));
-    try testing.expectEqual(9021, try part2(sample_input_large, allocator));
+    const buffer = try allocator.alloc(u8, 20);
+    defer allocator.free(buffer);
+    const input_path = try std.fmt.bufPrint(buffer, "inputs/{any}.txt", .{ @This() });
+    const input = try common.readFile(input_path, allocator);
+    defer allocator.free(input);
+    try testing.expectEqual(.{ 1414416, 1386070 }, run(input, allocator));
 }

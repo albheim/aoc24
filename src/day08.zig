@@ -1,8 +1,9 @@
 const std = @import("std");
+const common = @import("common");
 const testing = std.testing;
 const Allocator = std.mem.Allocator;
 const print = std.debug.print;
-const Vec = @import("common").Vec2(i64);
+const Vec = common.Vec2(i64);
 
 const ParsedData = struct {
     const Self = @This();
@@ -13,8 +14,8 @@ const ParsedData = struct {
 
     fn parse(input: []const u8, allocator: Allocator) !Self {
         var stations = std.AutoHashMap(u8, std.ArrayList(Vec)).init(allocator);
-        var height: usize = 0;
-        var width: usize = 0;
+        var height: u64 = 0;
+        var width: u64 = 0;
         var lines = std.mem.splitScalar(u8, input, '\n');
         while (lines.next()) |line| {
             if (line.len == 0) {
@@ -52,10 +53,18 @@ const ParsedData = struct {
     }
 };
 
-pub fn part1(input: []const u8, allocator: Allocator) !i64 {
+
+pub fn run(input: []const u8, allocator: Allocator) ![2]u64 {
     var data = try ParsedData.parse(input, allocator);
     defer data.deinit();
 
+    return .{
+        try part1(data, allocator),
+        try part2(data, allocator),
+    };
+}
+
+fn part1(data: ParsedData, allocator: Allocator) !u64 {
     var antinodes = std.AutoHashMap(Vec, void).init(allocator);
     defer antinodes.deinit();
 
@@ -76,11 +85,8 @@ pub fn part1(input: []const u8, allocator: Allocator) !i64 {
     return antinodes.count();
 }
 
-pub fn part2(input: []const u8, allocator: Allocator) !i64 {
-    var data = try ParsedData.parse(input, allocator);
-    defer data.deinit();
-
-    var antinodes = std.AutoHashMap(Vec, usize).init(allocator);
+fn part2(data: ParsedData, allocator: Allocator) !u64 {
+    var antinodes = std.AutoHashMap(Vec, u64).init(allocator);
     defer antinodes.deinit();
 
     var iter = data.stations.iterator();
@@ -107,8 +113,9 @@ pub fn part2(input: []const u8, allocator: Allocator) !i64 {
     return antinodes.count();
 }
 
-test "Tests" {
-    const sample_input =
+test "Sample" {
+    const allocator = testing.allocator;
+    const input =
         \\............
         \\........0...
         \\.....0......
@@ -122,7 +129,15 @@ test "Tests" {
         \\............
         \\............
     ;
+    try testing.expectEqual(.{ 14, 34 }, run(input, allocator));
+}
+
+test "Full" {
     const allocator = testing.allocator;
-    try testing.expectEqual(14, try part1(sample_input, allocator));
-    try testing.expectEqual(34, try part2(sample_input, allocator));
+    const buffer = try allocator.alloc(u8, 20);
+    defer allocator.free(buffer);
+    const input_path = try std.fmt.bufPrint(buffer, "inputs/{any}.txt", .{ @This() });
+    const input = try common.readFile(input_path, allocator);
+    defer allocator.free(input);
+    try testing.expectEqual(.{ 394, 1277 }, run(input, allocator));
 }
