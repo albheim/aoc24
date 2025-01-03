@@ -27,18 +27,13 @@ pub fn build(b: *std.Build) void {
     }
 }
 
-fn buildDay(b: *std.Build,
-    day: usize,
-    target: std.Build.ResolvedTarget, optimize: std.builtin.OptimizeMode,
-    common_module: *std.Build.Module, mecha_module: *std.Build.Module,
-    test_all_step: *std.Build.Step, run_all_step: *std.Build.Step, time_all_step: *std.Build.Step
-) void {
+fn buildDay(b: *std.Build, day: usize, target: std.Build.ResolvedTarget, optimize: std.builtin.OptimizeMode, common_module: *std.Build.Module, mecha_module: *std.Build.Module, test_all_step: *std.Build.Step, run_all_step: *std.Build.Step, time_all_step: *std.Build.Step) void {
     // Add day option to pass to the main executable
     const options = b.addOptions();
     options.addOption(usize, "day", day);
 
     // Setup day module module
-    const day_module_file = b.fmt("src/day{d:0>2}.zig", .{ day });
+    const day_module_file = b.fmt("src/day{d:0>2}.zig", .{day});
     const day_module = b.createModule(.{
         .root_source_file = b.path(day_module_file),
     });
@@ -61,7 +56,7 @@ fn buildDay(b: *std.Build,
 
     run_cmd.step.dependOn(b.getInstallStep());
 
-    const run_step = b.step(b.fmt("run-{d:0>2}", .{ day }), "Run on real data");
+    const run_step = b.step(b.fmt("run-{d:0>2}", .{day}), "Run on real data");
     run_step.dependOn(&run_cmd.step);
 
     // Test command
@@ -75,7 +70,7 @@ fn buildDay(b: *std.Build,
     day_tests.root_module.addImport("common", common_module);
     const run_tests = b.addRunArtifact(day_tests);
 
-    const test_step = b.step(b.fmt("test-{d:0>2}", .{ day }), "Run tests");
+    const test_step = b.step(b.fmt("test-{d:0>2}", .{day}), "Run tests");
     test_step.dependOn(&run_tests.step);
 
     // Profile command

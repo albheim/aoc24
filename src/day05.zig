@@ -61,7 +61,7 @@ fn part1(input: []const u8, allocator: Allocator) !u64 {
             try numbersList.append(n);
         }
         if (!failed) {
-            sum += numbersList.items[(numbersList.items.len - 1 ) / 2];
+            sum += numbersList.items[(numbersList.items.len - 1) / 2];
         }
     }
     return sum;
@@ -122,7 +122,7 @@ fn part2(input: []const u8, allocator: Allocator) !u64 {
             }
         }
         if (failed) {
-            sum += numbersList.items[(numbersList.items.len - 1 ) / 2];
+            sum += numbersList.items[(numbersList.items.len - 1) / 2];
         }
     }
     return sum;
@@ -167,7 +167,7 @@ test "Full" {
     const allocator = testing.allocator;
     const buffer = try allocator.alloc(u8, 20);
     defer allocator.free(buffer);
-    const input_path = try std.fmt.bufPrint(buffer, "inputs/{any}.txt", .{ @This() });
+    const input_path = try std.fmt.bufPrint(buffer, "inputs/{any}.txt", .{@This()});
     const input = try common.readFile(input_path, allocator);
     defer allocator.free(input);
     try testing.expectEqual(.{ 5955, 4030 }, run(input, allocator));

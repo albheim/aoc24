@@ -95,25 +95,22 @@ fn solve_maze(grid: FlexibleMatrix, allocator: Allocator) ![2]u64 {
     }
     starting_player.min_remaining = minDistRemaining(starting_player, end);
 
-    var players = std.PriorityQueue(
-        Player, void,
-        struct {
-            fn f(_: void, a: Player, b: Player) Order {
-                const a_tot = a.cost + a.min_remaining;
-                const b_tot = b.cost + b.min_remaining;
-                if (a_tot < b_tot) {
-                    return Order.lt;
-                } else if (a_tot > b_tot) {
-                    return Order.gt;
-                } else if (a.cost < b.cost) {
-                    return Order.lt;
-                } else if (a.cost > b.cost) {
-                    return Order.gt;
-                }
-                return Order.eq;
+    var players = std.PriorityQueue(Player, void, struct {
+        fn f(_: void, a: Player, b: Player) Order {
+            const a_tot = a.cost + a.min_remaining;
+            const b_tot = b.cost + b.min_remaining;
+            if (a_tot < b_tot) {
+                return Order.lt;
+            } else if (a_tot > b_tot) {
+                return Order.gt;
+            } else if (a.cost < b.cost) {
+                return Order.lt;
+            } else if (a.cost > b.cost) {
+                return Order.gt;
             }
-        }.f
-    ).init(allocator, {});
+            return Order.eq;
+        }
+    }.f).init(allocator, {});
     defer players.deinit();
     var visited = std.AutoHashMap(struct { pos: Vec, rot: Rotation }, bool).init(allocator);
     defer visited.deinit();
@@ -133,7 +130,7 @@ fn solve_maze(grid: FlexibleMatrix, allocator: Allocator) ![2]u64 {
             .min_remaining = 0, // Don't what this for the check later
         });
 
-        inline for (.{ Turn.Right, Turn.Left, Turn.None}) |turn| {
+        inline for (.{ Turn.Right, Turn.Left, Turn.None }) |turn| {
             var next = player.step(turn);
             // TODO have to separate visited check here
             if (grid.get(next.pos.y, next.pos.x) != '#' and !visited.contains(.{ .pos = next.pos, .rot = next.rot })) {
@@ -157,7 +154,7 @@ fn solve_maze(grid: FlexibleMatrix, allocator: Allocator) ![2]u64 {
         const player = players_removed.pop();
 
         // check if player + any step is in valid, if so add to valid
-        for ([_]Turn{ Turn.Right, Turn.Left, Turn.None}) |turn| {
+        for ([_]Turn{ Turn.Right, Turn.Left, Turn.None }) |turn| {
             const next = player.step(turn);
             if (valid.contains(next)) {
                 try valid.put(player, {});
@@ -266,7 +263,7 @@ test "Full" {
     const allocator = testing.allocator;
     const buffer = try allocator.alloc(u8, 20);
     defer allocator.free(buffer);
-    const input_path = try std.fmt.bufPrint(buffer, "inputs/{any}.txt", .{ @This() });
+    const input_path = try std.fmt.bufPrint(buffer, "inputs/{any}.txt", .{@This()});
     const input = try common.readFile(input_path, allocator);
     defer allocator.free(input);
     try testing.expectEqual(.{ 135512, 541 }, run(input, allocator));

@@ -25,12 +25,12 @@ fn part1(input: []const u8, allocator: Allocator) !u64 {
     var xmases: u64 = 0;
     for (0..data.len) |i| {
         for (0..data[i].len) |j| {
-            for ([3]i64{-1, 0, 1}) |di| {
-                for ([3]i64{-1, 0, 1}) |dj| {
+            for ([3]i64{ -1, 0, 1 }) |di| {
+                for ([3]i64{ -1, 0, 1 }) |dj| {
                     if (di == 0 and dj == 0) {
                         continue;
                     }
-                    if (search(data, .{@intCast(i), @intCast(j)}, .{di, dj})) {
+                    if (search(data, .{ @intCast(i), @intCast(j) }, .{ di, dj })) {
                         xmases += 1;
                     }
                 }
@@ -51,11 +51,9 @@ fn part2(input: []const u8, allocator: Allocator) !u64 {
     }
     const data = rows.items;
     var xmases: u64 = 0;
-    for (0..(data.len-2)) |i| {
-        for (0..(data[i].len-2)) |j| {
-            if (data[i+1][j+1] == 'A'
-                    and sAndM(data[i][j], data[i+2][j+2])
-                    and sAndM(data[i][j+2], data[i+2][j])) {
+    for (0..(data.len - 2)) |i| {
+        for (0..(data[i].len - 2)) |j| {
+            if (data[i + 1][j + 1] == 'A' and sAndM(data[i][j], data[i + 2][j + 2]) and sAndM(data[i][j + 2], data[i + 2][j])) {
                 xmases += 1;
             }
         }
@@ -71,9 +69,7 @@ fn search(data: [][]const u8, position: [2]i64, direction: [2]i64) bool {
         y += direction[0];
         x += direction[1];
         idx += 1;
-        if (idx == target.len
-                or  y < 0 or y >= data.len
-                or x < 0 or x >= data[@intCast(y)].len) {
+        if (idx == target.len or y < 0 or y >= data.len or x < 0 or x >= data[@intCast(y)].len) {
             break;
         }
     }
@@ -105,7 +101,7 @@ test "Full" {
     const allocator = testing.allocator;
     const buffer = try allocator.alloc(u8, 20);
     defer allocator.free(buffer);
-    const input_path = try std.fmt.bufPrint(buffer, "inputs/{any}.txt", .{ @This() });
+    const input_path = try std.fmt.bufPrint(buffer, "inputs/{any}.txt", .{@This()});
     const input = try common.readFile(input_path, allocator);
     defer allocator.free(input);
     try testing.expectEqual(.{ 2390, 1809 }, run(input, allocator));

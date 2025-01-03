@@ -12,11 +12,7 @@ pub fn run(input: []const u8, allocator: Allocator) ![2]u64 {
     };
 }
 
-fn check_region(
-    mat: *FlexibleMatrix,
-    i: u64, j: u64,
-    visited: *std.AutoHashMap(Vec, void)
-) struct { u64, u64 } {
+fn check_region(mat: *FlexibleMatrix, i: u64, j: u64, visited: *std.AutoHashMap(Vec, void)) struct { u64, u64 } {
     if (visited.contains(.{ .x = i, .y = j })) {
         return .{ 0, 0 };
     }
@@ -204,7 +200,7 @@ test "Full" {
     const allocator = testing.allocator;
     const buffer = try allocator.alloc(u8, 20);
     defer allocator.free(buffer);
-    const input_path = try std.fmt.bufPrint(buffer, "inputs/{any}.txt", .{ @This() });
+    const input_path = try std.fmt.bufPrint(buffer, "inputs/{any}.txt", .{@This()});
     const input = try common.readFile(input_path, allocator);
     defer allocator.free(input);
     try testing.expectEqual(.{ 1518548, 909564 }, run(input, allocator));

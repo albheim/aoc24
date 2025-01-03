@@ -23,21 +23,21 @@ pub fn Vec2(comptime T: type) type {
         y: T,
 
         pub fn add(self: Self, other: Self) Self {
-            return Self {
+            return Self{
                 .x = self.x + other.x,
                 .y = self.y + other.y,
             };
         }
 
         pub fn diff(self: Self, other: Self) Self {
-            return Self {
+            return Self{
                 .x = self.x - other.x,
                 .y = self.y - other.y,
             };
         }
 
         pub fn scale(self: Self, scalar: T) Self {
-            return Self {
+            return Self{
                 .x = self.x * scalar,
                 .y = self.y * scalar,
             };
@@ -62,7 +62,7 @@ pub fn FlexibleMatrix(comptime T: type) type {
         cols: usize,
 
         pub fn init(allocator: Allocator) Self {
-            return Self {
+            return Self{
                 .data = ArrayList(T).init(allocator),
                 .rows = 0,
                 .cols = 0,

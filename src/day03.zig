@@ -83,7 +83,7 @@ test "Full" {
     const allocator = testing.allocator;
     const buffer = try allocator.alloc(u8, 20);
     defer allocator.free(buffer);
-    const input_path = try std.fmt.bufPrint(buffer, "inputs/{any}.txt", .{ @This() });
+    const input_path = try std.fmt.bufPrint(buffer, "inputs/{any}.txt", .{@This()});
     const input = try common.readFile(input_path, allocator);
     defer allocator.free(input);
     try testing.expectEqual(.{ 184122457, 107862689 }, run(input, allocator));

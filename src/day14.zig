@@ -11,17 +11,11 @@ const ArrayList = std.ArrayList;
 const robots_parser = mecha.combine(.{
     mecha.string("p=").discard(),
     mecha.int(i64, .{})
-        .manyN(2, .{
-            .separator = mecha.ascii.char(',').discard()
-        }).map(mecha.toStruct(Vec)),
+        .manyN(2, .{ .separator = mecha.ascii.char(',').discard() }).map(mecha.toStruct(Vec)),
     mecha.string(" v=").discard(),
     mecha.int(i64, .{})
-        .manyN(2, .{
-            .separator = mecha.ascii.char(',').discard()
-        }).map(mecha.toStruct(Vec)),
-}).map(mecha.toStruct(Robot)).many(.{
-    .separator = mecha.ascii.char('\n').discard()
-});
+        .manyN(2, .{ .separator = mecha.ascii.char(',').discard() }).map(mecha.toStruct(Vec)),
+}).map(mecha.toStruct(Robot)).many(.{ .separator = mecha.ascii.char('\n').discard() });
 
 const Robot = struct {
     const Self = @This();
@@ -118,7 +112,7 @@ const Room = struct {
             }
         }
 
-        return .{ .x = @intCast(row_len), .y = @intCast(col_len)};
+        return .{ .x = @intCast(row_len), .y = @intCast(col_len) };
     }
 
     fn calculateSafetyFactor(self: Self) u64 {
@@ -181,7 +175,6 @@ fn part2(input: []const u8, width: i64, height: i64, allocator: Allocator) !u64 
     var curr: i64 = 0;
     var steps_w: i64 = -1;
     var steps_h: i64 = -1;
-
 
     var rows = ArrayList(ArrayList(bool)).init(allocator);
     defer {
@@ -252,7 +245,7 @@ test "Full" {
     const allocator = testing.allocator;
     const buffer = try allocator.alloc(u8, 20);
     defer allocator.free(buffer);
-    const input_path = try std.fmt.bufPrint(buffer, "inputs/{any}.txt", .{ @This() });
+    const input_path = try std.fmt.bufPrint(buffer, "inputs/{any}.txt", .{@This()});
     const input = try common.readFile(input_path, allocator);
     defer allocator.free(input);
     try testing.expectEqual(.{ 222208000, 7623 }, run(input, allocator));

@@ -53,7 +53,6 @@ const ParsedData = struct {
     }
 };
 
-
 pub fn run(input: []const u8, allocator: Allocator) ![2]u64 {
     var data = try ParsedData.parse(input, allocator);
     defer data.deinit();
@@ -72,7 +71,7 @@ fn part1(data: ParsedData, allocator: Allocator) !u64 {
     while (iter.next()) |entry| {
         const list = entry.value_ptr.items;
         for (0..list.len) |i| {
-            for (i+1..list.len) |j| {
+            for (i + 1..list.len) |j| {
                 const diff = list[i].diff(list[j]);
                 for ([_]Vec{ list[i].add(diff), list[j].add(diff.scale(-1)) }) |a| {
                     if (a.isInside(data.width, data.height)) {
@@ -93,7 +92,7 @@ fn part2(data: ParsedData, allocator: Allocator) !u64 {
     while (iter.next()) |entry| {
         const list = entry.value_ptr.items;
         for (0..list.len) |i| {
-            for (i+1..list.len) |j| {
+            for (i + 1..list.len) |j| {
                 var diff = list[i].diff(list[j]);
                 const d: i64 = @intCast(std.math.gcd(@abs(diff.x), @abs(diff.y)));
                 diff = Vec{ .x = @divFloor(diff.x, d), .y = @divFloor(diff.y, d) };
@@ -136,7 +135,7 @@ test "Full" {
     const allocator = testing.allocator;
     const buffer = try allocator.alloc(u8, 20);
     defer allocator.free(buffer);
-    const input_path = try std.fmt.bufPrint(buffer, "inputs/{any}.txt", .{ @This() });
+    const input_path = try std.fmt.bufPrint(buffer, "inputs/{any}.txt", .{@This()});
     const input = try common.readFile(input_path, allocator);
     defer allocator.free(input);
     try testing.expectEqual(.{ 394, 1277 }, run(input, allocator));

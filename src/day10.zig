@@ -14,10 +14,10 @@ pub fn run(input: []const u8, allocator: Allocator) ![2]u64 {
 }
 
 fn search(mat: *FlexibleMatrix(u8), i: u64, j: u64, visited: *std.AutoHashMap(Vec, void)) u64 {
-    if (visited.contains(Vec{ .x=i, .y=j })) {
+    if (visited.contains(Vec{ .x = i, .y = j })) {
         return 0;
     }
-    visited.put(Vec{ .x=i, .y=j}, {}) catch unreachable;
+    visited.put(Vec{ .x = i, .y = j }, {}) catch unreachable;
     if (mat.get(i, j) == '9') {
         return 1;
     }
@@ -63,7 +63,7 @@ fn part1(input: []const u8, allocator: Allocator) !u64 {
 }
 
 fn search2(mat: *FlexibleMatrix(u8), i: u64, j: u64, visited: *std.AutoHashMap(Vec, u64)) u64 {
-    if (visited.get(Vec{ .x=i, .y=j })) |n| {
+    if (visited.get(Vec{ .x = i, .y = j })) |n| {
         return n;
     }
     if (mat.get(i, j) == '9') {
@@ -82,7 +82,7 @@ fn search2(mat: *FlexibleMatrix(u8), i: u64, j: u64, visited: *std.AutoHashMap(V
     if (j + 1 < mat.colCount() and mat.get(i, j + 1) == mat.get(i, j) + 1) {
         found += search2(mat, i, j + 1, visited);
     }
-    visited.put(Vec{ .x=i, .y=j}, found) catch unreachable;
+    visited.put(Vec{ .x = i, .y = j }, found) catch unreachable;
     return found;
 }
 
@@ -96,7 +96,6 @@ fn part2(input: []const u8, allocator: Allocator) !u64 {
         }
         try mat.addRow(line);
     }
-
 
     var trails: u64 = 0;
     for (0..mat.colCount()) |i| {
@@ -131,7 +130,7 @@ test "Full" {
     const allocator = testing.allocator;
     const buffer = try allocator.alloc(u8, 20);
     defer allocator.free(buffer);
-    const input_path = try std.fmt.bufPrint(buffer, "inputs/{any}.txt", .{ @This() });
+    const input_path = try std.fmt.bufPrint(buffer, "inputs/{any}.txt", .{@This()});
     const input = try common.readFile(input_path, allocator);
     defer allocator.free(input);
     try testing.expectEqual(.{ 501, 1017 }, run(input, allocator));

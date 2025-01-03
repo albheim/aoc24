@@ -43,8 +43,8 @@ pub fn run(input: []const u8, allocator: Allocator) ![2]u64 {
 fn checkLeastCost(a: Vec, b: Vec, c: Vec, limit: ?u64) ?u64 {
     const det: i64 = @as(i64, @intCast(a.x * b.y)) - @as(i64, @intCast(a.y * b.x));
     if (det != 0) {
-        const nom_a = @as(i64, @intCast(b.y*c.x)) - @as(i64, @intCast(b.x*c.y));
-        const nom_b = @as(i64, @intCast(a.x*c.y)) - @as(i64, @intCast(a.y*c.x));
+        const nom_a = @as(i64, @intCast(b.y * c.x)) - @as(i64, @intCast(b.x * c.y));
+        const nom_b = @as(i64, @intCast(a.x * c.y)) - @as(i64, @intCast(a.y * c.x));
         if (@rem(nom_a, det) == 0 and @rem(nom_b, det) == 0) {
             const push_a = @divExact(nom_a, det);
             const push_b = @divExact(nom_b, det);
@@ -110,7 +110,7 @@ test "Full" {
     const allocator = testing.allocator;
     const buffer = try allocator.alloc(u8, 20);
     defer allocator.free(buffer);
-    const input_path = try std.fmt.bufPrint(buffer, "inputs/{any}.txt", .{ @This() });
+    const input_path = try std.fmt.bufPrint(buffer, "inputs/{any}.txt", .{@This()});
     const input = try common.readFile(input_path, allocator);
     defer allocator.free(input);
     try testing.expectEqual(.{ 36250, 83232379451012 }, run(input, allocator));

@@ -10,9 +10,7 @@ const Player = struct {
 
     pub fn step(self: *Player, map: [][]const u8) bool {
         var pos = self.pos.add(self.dir);
-        while (pos.x >= 0 and pos.x < map[0].len
-                and pos.y >= 0 and pos.y < map.len
-                and map[@intCast(pos.y)][@intCast(pos.x)] == '#') {
+        while (pos.x >= 0 and pos.x < map[0].len and pos.y >= 0 and pos.y < map.len and map[@intCast(pos.y)][@intCast(pos.x)] == '#') {
             const tmp = self.dir.x;
             self.dir.x = -self.dir.y;
             self.dir.y = tmp;
@@ -35,10 +33,7 @@ fn part1(input: []const u8, allocator: Allocator) !u64 {
     defer map.deinit();
 
     var lines = std.mem.splitScalar(u8, input, '\n');
-    var player = Player{
-        .pos = .{ .x = 0, .y = 0 },
-        .dir = .{ .x = 0, .y = 0 }
-    };
+    var player = Player{ .pos = .{ .x = 0, .y = 0 }, .dir = .{ .x = 0, .y = 0 } };
     var lineCount: u64 = 0;
     while (lines.next()) |line| : (lineCount += 1) {
         if (line.len == 0) {
@@ -79,10 +74,7 @@ fn part2(input: []const u8, allocator: Allocator) !u64 {
     defer map_lines.deinit();
 
     var lines = std.mem.splitScalar(u8, input, '\n');
-    var player_start = Player{
-        .pos = .{ .x = 0, .y = 0 },
-        .dir = .{ .x = 0, .y = 0 }
-    };
+    var player_start = Player{ .pos = .{ .x = 0, .y = 0 }, .dir = .{ .x = 0, .y = 0 } };
     var lineCount: u64 = 0;
     while (lines.next()) |line| : (lineCount += 1) {
         if (line.len == 0) {
@@ -178,7 +170,7 @@ test "Full" {
     const allocator = testing.allocator;
     const buffer = try allocator.alloc(u8, 20);
     defer allocator.free(buffer);
-    const input_path = try std.fmt.bufPrint(buffer, "inputs/{any}.txt", .{ @This() });
+    const input_path = try std.fmt.bufPrint(buffer, "inputs/{any}.txt", .{@This()});
     const input = try common.readFile(input_path, allocator);
     defer allocator.free(input);
     try testing.expectEqual(.{ 5461, 1836 }, run(input, allocator));

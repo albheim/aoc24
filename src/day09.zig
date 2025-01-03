@@ -102,14 +102,14 @@ fn part2(input: []const u8, allocator: Allocator) !u64 {
                                 list.items[i].count -= list.items[idx_r].count;
                             }
                         },
-                        .empty => {}
+                        .empty => {},
                     }
                     idx_r -= 1;
                 }
                 for (0..list.items[i].count) |_| {
                     idx += 1;
                 }
-            }
+            },
         }
     }
     return @intCast(checksum);
@@ -127,7 +127,7 @@ test "Full" {
     const allocator = testing.allocator;
     const buffer = try allocator.alloc(u8, 20);
     defer allocator.free(buffer);
-    const input_path = try std.fmt.bufPrint(buffer, "inputs/{any}.txt", .{ @This() });
+    const input_path = try std.fmt.bufPrint(buffer, "inputs/{any}.txt", .{@This()});
     const input = try common.readFile(input_path, allocator);
     defer allocator.free(input);
     try testing.expectEqual(.{ 6398252054886, 6415666220005 }, run(input, allocator));

@@ -92,7 +92,6 @@ fn scoreGrid(grid: FlexibleMatrix, box_token: u8) u64 {
     return score;
 }
 
-
 fn part1(input: []const u8, allocator: Allocator) !u64 {
     var grid = FlexibleMatrix.init(allocator);
     defer grid.deinit();
@@ -360,7 +359,7 @@ test "Full" {
     const allocator = testing.allocator;
     const buffer = try allocator.alloc(u8, 20);
     defer allocator.free(buffer);
-    const input_path = try std.fmt.bufPrint(buffer, "inputs/{any}.txt", .{ @This() });
+    const input_path = try std.fmt.bufPrint(buffer, "inputs/{any}.txt", .{@This()});
     const input = try common.readFile(input_path, allocator);
     defer allocator.free(input);
     try testing.expectEqual(.{ 1414416, 1386070 }, run(input, allocator));
