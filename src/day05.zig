@@ -45,7 +45,7 @@ fn part1(input: []const u8, allocator: Allocator) !u64 {
         }
         var numbers = std.mem.splitScalar(u8, line, ',');
         var failed = false;
-        numbersList.clearAndFree();
+        numbersList.clearRetainingCapacity();
         skipLine: while (numbers.next()) |number| {
             const n = try parseInt(u64, number, 10);
             if (rules.get(n)) |list| {
@@ -101,7 +101,7 @@ fn part2(input: []const u8, allocator: Allocator) !u64 {
         }
         var numbers = std.mem.splitScalar(u8, line, ',');
         var failed = false;
-        numbersList.clearAndFree();
+        numbersList.clearRetainingCapacity();
         while (numbers.next()) |number| {
             const n = try parseInt(u64, number, 10);
             var switched = false;

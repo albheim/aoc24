@@ -107,7 +107,7 @@ fn part1(patterns: PatternMatcher, displays: []const []const u8, allocator: Allo
     defer memo.deinit();
     for (displays) |display| {
         //print("\n\nChecking: {s}\n", .{display});
-        memo.clearAndFree();
+        memo.clearRetainingCapacity();
         if (patterns.canMatch(patterns, display, &memo)) {
             //print("Match!\n", .{});
             counter += 1;
@@ -122,7 +122,7 @@ fn part2(patterns: PatternMatcher, displays: []const []const u8, allocator: Allo
     defer memo.deinit();
     for (displays) |display| {
         print("Checking {s}\n", .{display});
-        memo.clearAndFree();
+        memo.clearRetainingCapacity();
         const t = patterns.countMatch(patterns, display, &memo);
         print("Found {d}\n", .{t});
         counter += t;

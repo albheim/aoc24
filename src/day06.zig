@@ -8,16 +8,16 @@ const Player = struct {
     pos: Vec2(i64),
     dir: Vec2(i64),
 
-    pub fn step(self: *Player, map: [][]const u8) bool {
+    pub fn step(self: *Player, map: common.FlexibleMatrix(u8)) bool {
         var pos = self.pos.add(self.dir);
-        while (pos.x >= 0 and pos.x < map[0].len and pos.y >= 0 and pos.y < map.len and map[@intCast(pos.y)][@intCast(pos.x)] == '#') {
+        while (pos.x >= 0 and pos.x < map.colCount() and pos.y >= 0 and pos.y < map.rowCount() and map.get(@intCast(pos.y), @intCast(pos.x)) == '#') {
             const tmp = self.dir.x;
             self.dir.x = -self.dir.y;
             self.dir.y = tmp;
             pos = self.pos.add(self.dir);
         }
         self.pos = pos;
-        return pos.x >= 0 and pos.x < map[0].len and pos.y >= 0 and pos.y < map.len;
+        return pos.x >= 0 and pos.x < map.colCount() and pos.y >= 0 and pos.y < map.rowCount();
     }
 };
 
@@ -29,7 +29,7 @@ pub fn run(input: []const u8, allocator: Allocator) ![2]u64 {
 }
 
 fn part1(input: []const u8, allocator: Allocator) !u64 {
-    var map = std.ArrayList([]const u8).init(allocator);
+    var map = common.FlexibleMatrix(u8).init(allocator);
     defer map.deinit();
 
     var lines = std.mem.splitScalar(u8, input, '\n');
@@ -39,7 +39,7 @@ fn part1(input: []const u8, allocator: Allocator) !u64 {
         if (line.len == 0) {
             break;
         }
-        try map.append(line);
+        try map.addRow(line);
         for (0..line.len) |i| {
             switch (line[i]) {
                 '^', '>', 'v', '<' => |d| {
@@ -62,7 +62,7 @@ fn part1(input: []const u8, allocator: Allocator) !u64 {
     defer visited.deinit();
 
     try visited.put(player.pos, {});
-    while (player.step(map.items)) {
+    while (player.step(map)) {
         try visited.put(player.pos, {});
     }
 
@@ -70,8 +70,8 @@ fn part1(input: []const u8, allocator: Allocator) !u64 {
 }
 
 fn part2(input: []const u8, allocator: Allocator) !u64 {
-    var map_lines = std.ArrayList([]const u8).init(allocator);
-    defer map_lines.deinit();
+    var map = common.FlexibleMatrix(u8).init(allocator);
+    defer map.deinit();
 
     var lines = std.mem.splitScalar(u8, input, '\n');
     var player_start = Player{ .pos = .{ .x = 0, .y = 0 }, .dir = .{ .x = 0, .y = 0 } };
@@ -80,7 +80,7 @@ fn part2(input: []const u8, allocator: Allocator) !u64 {
         if (line.len == 0) {
             break;
         }
-        try map_lines.append(line);
+        try map.addRow(line);
         for (0..line.len) |i| {
             switch (line[i]) {
                 '^', '>', 'v', '<' => |d| {
@@ -100,51 +100,41 @@ fn part2(input: []const u8, allocator: Allocator) !u64 {
         }
     }
 
-    var map = map_lines.items;
     var count: u64 = 0;
 
-    var visited = std.AutoHashMap(Vec2(i64), u64).init(allocator);
+    var visited_loop = std.AutoHashMap(Player, void).init(allocator);
+    defer visited_loop.deinit();
+
+    var visited = std.AutoHashMap(Vec2(i64), void).init(allocator);
     defer visited.deinit();
     var player = player_start;
     while (player.step(map)) {
         if (visited.get(player.pos)) |_| {
             continue;
         }
-        try visited.put(player.pos, 1);
+        try visited.put(player.pos, {});
         const i: u64 = @intCast(player.pos.y);
         const j: u64 = @intCast(player.pos.x);
-        if (map[i][j] == '.') {
-            var tmp = try allocator.alloc(u8, map[0].len);
-            defer allocator.free(tmp);
-            for (0..map[0].len) |k| {
-                if (k == j) {
-                    tmp[k] = '#';
-                } else {
-                    tmp[k] = map[i][k];
-                }
-            }
-            const old = map[i];
-            map[i] = tmp;
-            if (try isLoop(map, player_start, allocator)) {
+        if (map.get(i, j) == '.') {
+            map.set(i, j, '#');
+            if (try isLoop(map, player_start, &visited_loop)) {
                 count += 1;
             }
-            map[i] = old;
+            map.set(i, j, '.');
         }
     }
     return count;
 }
 
-fn isLoop(map: [][]const u8, player_start: Player, allocator: Allocator) !bool {
-    var visited = std.AutoHashMap(Player, u64).init(allocator);
-    defer visited.deinit();
-
+fn isLoop(map: common.FlexibleMatrix(u8), player_start: Player, visited: *std.AutoHashMap(Player, void)) !bool {
+    visited.clearRetainingCapacity();
     var player = player_start;
-    try visited.put(player, 1);
+    try visited.put(player, {});
     while (player.step(map)) {
         if (visited.get(player)) |_| {
             return true;
         }
-        try visited.put(player, 1);
+        try visited.put(player, {});
     }
     return false;
 }
