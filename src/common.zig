@@ -37,7 +37,7 @@ pub fn Vec2(comptime T: type) type {
         }
 
         pub fn l1norm(self: Self) T {
-            return self.x + self.y;
+            return @intCast(@abs(self.x) + @abs(self.y));
         }
 
         pub fn scale(self: Self, scalar: T) Self {
