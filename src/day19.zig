@@ -3,8 +3,6 @@ const common = @import("common");
 const testing = std.testing;
 const Allocator = std.mem.Allocator;
 
-const print = std.debug.print;
-
 const PatternMatcher = struct {
     const Self = @This();
 
@@ -106,10 +104,8 @@ fn part1(patterns: PatternMatcher, displays: []const []const u8, allocator: Allo
     var memo = std.StringHashMap(bool).init(allocator);
     defer memo.deinit();
     for (displays) |display| {
-        //print("\n\nChecking: {s}\n", .{display});
         memo.clearRetainingCapacity();
         if (patterns.canMatch(patterns, display, &memo)) {
-            //print("Match!\n", .{});
             counter += 1;
         }
     }
@@ -121,10 +117,8 @@ fn part2(patterns: PatternMatcher, displays: []const []const u8, allocator: Allo
     var memo = std.StringHashMap(u64).init(allocator);
     defer memo.deinit();
     for (displays) |display| {
-        print("Checking {s}\n", .{display});
         memo.clearRetainingCapacity();
         const t = patterns.countMatch(patterns, display, &memo);
-        print("Found {d}\n", .{t});
         counter += t;
     }
     return counter;
@@ -154,5 +148,5 @@ test "Full" {
     const input_path = try std.fmt.bufPrint(buffer, "inputs/{any}.txt", .{@This()});
     const input = try common.readFile(input_path, allocator);
     defer allocator.free(input);
-    try testing.expectEqual(.{ 353, 0 }, run(input, allocator));
+    try testing.expectEqual(.{ 353, 880877787214477 }, run(input, allocator));
 }
